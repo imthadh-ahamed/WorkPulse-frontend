@@ -103,7 +103,7 @@ export function Sidebar({ mobileOpen, onDrawerToggle }: SidebarProps) {
         >
           <Building2 />
           <Typography variant="subtitle1" fontWeight="medium">
-            HR Manager
+            Work Pulse
           </Typography>
         </Box>
       </Toolbar>

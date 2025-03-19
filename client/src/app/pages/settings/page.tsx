@@ -105,7 +105,7 @@ export default function SettingsPage() {
                 <TextField
                   fullWidth
                   label="Job Title"
-                  defaultValue="HR Manager"
+                  defaultValue="Work Pulse"
                   variant="outlined"
                 />
               </Grid>

@@ -65,7 +65,7 @@ export default function LoginPage() {
         >
           <Building size={80} />
           <Typography variant="h3" component="h1" fontWeight="bold">
-            HR Manager
+            Work Pulse
           </Typography>
           <Typography variant="h6" align="center">
             Streamline your HR operations and boost productivity

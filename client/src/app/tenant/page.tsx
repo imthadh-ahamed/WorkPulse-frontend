@@ -65,7 +65,7 @@ export default function CreateOrganizationPage() {
         >
           <Building size={80} />
           <Typography variant="h3" component="h1" fontWeight="bold">
-            HR Manager
+            Work Pulse
           </Typography>
           <Typography variant="h6" align="center">
             Create your organization and start managing your team
