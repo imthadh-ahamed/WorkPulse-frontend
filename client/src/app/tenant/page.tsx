@@ -207,7 +207,7 @@ export default function CreateOrganizationPage() {
             <Typography variant="body2" color="text.secondary">
               Already have an account?{" "}
               <Link
-                href="/login"
+                href="/"
                 style={{ color: "inherit", textDecoration: "none" }}
               >
                 <Typography
