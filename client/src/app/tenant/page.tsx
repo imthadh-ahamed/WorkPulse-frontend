@@ -19,6 +19,25 @@ import {
   IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import "../globals.css";
+
+// Validation Schema
+const validationSchema = Yup.object({
+  firstName: Yup.string().required("First Name is required"),
+  lastName: Yup.string().required("Last Name is required"),
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(8, "Password must be at least 8 characters")
+    .required("Password is required"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password")], "Passwords must match")
+    .required("Confirm Password is required"),
+  companyName: Yup.string().required("Company Name is required"),
+});
 
 export default function CreateOrganizationPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,10 +53,19 @@ export default function CreateOrganizationPage() {
     event.preventDefault();
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  interface FormValues {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    companyName: string;
+  }
+
+  const handleSubmit = (values: FormValues) => {
+    console.log("Form values:", values);
     // In a real app, this would create an organization and redirect
-    window.location.href = "/dashboard";
+    window.location.href = "/pages/dashboard";
   };
 
   return (
@@ -100,107 +128,152 @@ export default function CreateOrganizationPage() {
           </Box>
 
           <Paper elevation={0} sx={{ p: 4 }}>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
+            <Formik
+              initialValues={{
+                firstName: "",
+                lastName: "",
+                email: "",
+                password: "",
+                confirmPassword: "",
+                companyName: "",
+              }}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ errors, touched }) => (
+                <Form>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <Field
+                        as={TextField}
+                        required
+                        fullWidth
+                        id="firstName"
+                        label="Admin's First Name"
+                        name="firstName"
+                        autoFocus
+                        error={touched.firstName && !!errors.firstName}
+                        helperText={touched.firstName && errors.firstName}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Field
+                        as={TextField}
+                        required
+                        fullWidth
+                        id="lastName"
+                        label="Admin's Last Name"
+                        name="lastName"
+                        error={touched.lastName && !!errors.lastName}
+                        helperText={touched.lastName && errors.lastName}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  <Field
+                    as={TextField}
+                    margin="normal"
                     required
                     fullWidth
-                    id="firstName"
-                    label="Admin's First Name"
-                    name="firstName"
-                    autoFocus
+                    id="email"
+                    label="Admin's Email"
+                    name="email"
+                    autoComplete="email"
+                    error={touched.email && !!errors.email}
+                    helperText={touched.email && errors.email}
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
+
+                  <FormControl sx={{ mt: 2, width: "100%" }} variant="outlined">
+                    <InputLabel htmlFor="password">
+                      Admin&apos;s Password
+                    </InputLabel>
+                    <Field
+                      as={OutlinedInput}
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      error={touched.password && !!errors.password}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      label="Admin's Password"
+                    />
+                    <ErrorMessage
+                      name="password"
+                      component="div"
+                      className="error-message"
+                    />
+                  </FormControl>
+
+                  <FormControl sx={{ mt: 2, width: "100%" }} variant="outlined">
+                    <InputLabel htmlFor="confirmPassword">
+                      Recheck Password
+                    </InputLabel>
+                    <Field
+                      as={OutlinedInput}
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      error={
+                        touched.confirmPassword && !!errors.confirmPassword
+                      }
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowConfirmPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                          >
+                            {showConfirmPassword ? (
+                              <VisibilityOff />
+                            ) : (
+                              <Visibility />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      label="Recheck Password"
+                    />
+                    <ErrorMessage
+                      name="confirmPassword"
+                      component="div"
+                      className="error-message"
+                    />
+                  </FormControl>
+
+                  <Field
+                    as={TextField}
+                    margin="normal"
                     required
                     fullWidth
-                    id="lastName"
-                    label="Admin's Last Name"
-                    name="lastName"
+                    id="companyName"
+                    label="Company Name"
+                    name="companyName"
+                    error={touched.companyName && !!errors.companyName}
+                    helperText={touched.companyName && errors.companyName}
                   />
-                </Grid>
-              </Grid>
 
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Admin's Email"
-                name="email"
-                autoComplete="email"
-              />
-
-              <FormControl sx={{ mt: 2, width: "100%" }} variant="outlined">
-                <InputLabel htmlFor="password">
-                  Admin&apos;s Password
-                </InputLabel>
-                <OutlinedInput
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Admin's Password"
-                />
-              </FormControl>
-
-              <FormControl sx={{ mt: 2, width: "100%" }} variant="outlined">
-                <InputLabel htmlFor="confirmPassword">
-                  Recheck Password
-                </InputLabel>
-                <OutlinedInput
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowConfirmPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showConfirmPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Recheck Password"
-                />
-              </FormControl>
-
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="companyName"
-                label="Company Name"
-                name="companyName"
-              />
-
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2, py: 1.5 }}
-              >
-                Create Organization
-              </Button>
-            </Box>
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2, py: 1.5 }}
+                  >
+                    Create Organization
+                  </Button>
+                </Form>
+              )}
+            </Formik>
           </Paper>
 
           <Box sx={{ mt: 3, textAlign: "center" }}>

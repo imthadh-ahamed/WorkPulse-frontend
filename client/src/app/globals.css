@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+.error-message {
+  color: red;
+  fontsize: 0.875rem;
+}
