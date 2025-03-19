@@ -28,7 +28,7 @@ export function Footer() {
           <Grid container spacing={4}>
             <Grid item xs={12} sm={4}>
               <Typography variant="h6" color="text.primary" gutterBottom>
-                HR Manager
+                Work Pulse
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Streamline your HR operations and boost productivity.
@@ -70,7 +70,7 @@ export function Footer() {
                     color="text.secondary"
                     sx={{ mb: 1 }}
                   >
-                    © {new Date().getFullYear()} HR Manager. All rights
+                    © {new Date().getFullYear()} Work Pulse. All rights
                     reserved.
                   </Typography>
                   <Box sx={{ display: "flex", gap: 1 }}>
