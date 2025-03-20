@@ -3,7 +3,6 @@
 import type React from "react";
 import Link from "next/link";
 import { useState } from "react";
-import { Building } from "lucide-react";
 import {
   Button,
   TextField,
@@ -22,16 +21,25 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "../globals.css";
+import Image from "next/image";
 
 // Validation Schema
 const validationSchema = Yup.object({
-  firstName: Yup.string().required("First Name is required"),
-  lastName: Yup.string().required("Last Name is required"),
+  firstName: Yup.string()
+    .max(50, "First Name must be within 50 characters")
+    .required("First Name is required"),
+  lastName: Yup.string()
+    .max(50, "Last Name must be within 50 characters")
+    .required("Last Name is required"),
   email: Yup.string()
     .email("Invalid email address")
     .required("Email is required"),
   password: Yup.string()
     .min(8, "Password must be at least 8 characters")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+    )
     .required("Password is required"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords must match")
@@ -91,7 +99,12 @@ export default function CreateOrganizationPage() {
             gap: 2,
           }}
         >
-          <Building size={80} />
+          <Image
+            src="/images/logo.png"
+            alt="Work Pulse Logo"
+            width={300}
+            height={300}
+          />
           <Typography variant="h3" component="h1" fontWeight="bold">
             Work Pulse
           </Typography>
@@ -183,7 +196,12 @@ export default function CreateOrganizationPage() {
                     helperText={touched.email && errors.email}
                   />
 
-                  <FormControl sx={{ mt: 2, width: "100%" }} variant="outlined">
+                  <FormControl
+                    sx={{ mt: 2, width: "100%" }}
+                    variant="outlined"
+                    required
+                    error={touched.password && !!errors.password}
+                  >
                     <InputLabel htmlFor="password">
                       Admin&apos;s Password
                     </InputLabel>
@@ -214,7 +232,12 @@ export default function CreateOrganizationPage() {
                     />
                   </FormControl>
 
-                  <FormControl sx={{ mt: 2, width: "100%" }} variant="outlined">
+                  <FormControl
+                    sx={{ mt: 2, width: "100%" }}
+                    variant="outlined"
+                    required
+                    error={touched.confirmPassword && !!errors.confirmPassword}
+                  >
                     <InputLabel htmlFor="confirmPassword">
                       Recheck Password
                     </InputLabel>
