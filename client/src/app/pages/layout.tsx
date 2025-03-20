@@ -28,7 +28,6 @@ export default function MainLayout({
           component="main"
           sx={{
             flexGrow: 1,
-            p: 3,
             width: { sm: `calc(100% - 240px)` },
             display: "flex",
             flexDirection: "column",

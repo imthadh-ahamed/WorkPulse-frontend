@@ -105,7 +105,7 @@ export default function CalendarPage() {
   const [currentMonth] = useState("September 2023");
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Box
         sx={{
           display: "flex",

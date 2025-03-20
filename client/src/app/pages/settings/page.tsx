@@ -33,7 +33,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
         Settings
       </Typography>
