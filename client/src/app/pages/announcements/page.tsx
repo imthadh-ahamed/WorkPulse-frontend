@@ -81,7 +81,7 @@ const announcements: Announcement[] = [
 
 export default function AnnouncementsPage() {
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Box
         sx={{
           display: "flex",

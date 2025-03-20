@@ -84,7 +84,7 @@ export default function TaskManagementPage() {
   });
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Box
         sx={{
           display: "flex",

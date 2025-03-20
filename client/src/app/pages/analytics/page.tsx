@@ -62,7 +62,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
         Analytics
       </Typography>
