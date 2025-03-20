@@ -1,12 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { Building } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Formik, Form } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { Button, Box, Typography, Container, Paper, Grid } from "@mui/material";
-import { TextField } from "@mui/material";
+import {
+  Button,
+  Box,
+  Typography,
+  Container,
+  Paper,
+  Grid,
+  TextField,
+  InputAdornment,
+  IconButton,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+} from "@mui/material";
+import Image from "next/image";
+import { useState } from "react";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 // Validation schema
 const SignupSchema = Yup.object().shape({
@@ -33,6 +47,19 @@ const SignupSchema = Yup.object().shape({
 
 export default function SignupPage() {
   const router = useRouter();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword((show) => !show);
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
 
   const initialValues = {
     firstName: "",
@@ -65,7 +92,12 @@ export default function SignupPage() {
             gap: 2,
           }}
         >
-          <Building size={80} />
+          <Image
+            src="/images/logo.png"
+            alt="Work Pulse Logo"
+            width={300}
+            height={300}
+          />
           <Typography variant="h3" component="h1" fontWeight="bold">
             Work Pulse
           </Typography>
@@ -114,31 +146,38 @@ export default function SignupPage() {
                 }, 500);
               }}
             >
-              {({ isSubmitting }) => (
+              {({ isSubmitting, errors, touched }) => (
                 <Form>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <TextField
+                      <Field
+                        as={TextField}
                         required
                         fullWidth
                         id="firstName"
                         name="firstName"
                         label="First Name"
                         autoFocus
+                        error={Boolean(errors.firstName && touched.firstName)}
+                        helperText={<ErrorMessage name="firstName" />}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <TextField
+                      <Field
+                        as={TextField}
                         required
                         fullWidth
                         id="lastName"
                         name="lastName"
                         label="Last Name"
+                        error={Boolean(errors.lastName && touched.lastName)}
+                        helperText={<ErrorMessage name="lastName" />}
                       />
                     </Grid>
                   </Grid>
 
-                  <TextField
+                  <Field
+                    as={TextField}
                     margin="normal"
                     required
                     fullWidth
@@ -146,11 +185,85 @@ export default function SignupPage() {
                     name="email"
                     label="Email Address"
                     autoComplete="email"
+                    error={Boolean(errors.email && touched.email)}
+                    helperText={<ErrorMessage name="email" />}
                   />
 
-                  <TextField name="password" label="Password" />
+                  <FormControl
+                    sx={{ mt: 2, width: "100%" }}
+                    variant="outlined"
+                    required
+                    error={touched.password && !!errors.password}
+                  >
+                    <InputLabel htmlFor="password">Password</InputLabel>
+                    <Field
+                      as={OutlinedInput}
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      error={touched.password && !!errors.password}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      label="Password *"
+                    />
+                    <ErrorMessage
+                      name="password"
+                      component="div"
+                      className="error-message"
+                    />
+                  </FormControl>
 
-                  <TextField name="confirmPassword" label="Confirm Password" />
+                  <FormControl
+                    sx={{ mt: 2, width: "100%" }}
+                    variant="outlined"
+                    required
+                    error={touched.confirmPassword && !!errors.confirmPassword}
+                  >
+                    <InputLabel htmlFor="confirmPassword">
+                      Confirm Password
+                    </InputLabel>
+                    <Field
+                      as={OutlinedInput}
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      error={
+                        touched.confirmPassword && !!errors.confirmPassword
+                      }
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowConfirmPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                          >
+                            {showConfirmPassword ? (
+                              <VisibilityOff />
+                            ) : (
+                              <Visibility />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      label="Confirm Password *"
+                    />
+                    <ErrorMessage
+                      name="confirmPassword"
+                      component="div"
+                      className="error-message"
+                    />
+                  </FormControl>
 
                   <Button
                     type="submit"
