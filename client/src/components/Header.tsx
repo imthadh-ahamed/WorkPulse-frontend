@@ -13,7 +13,6 @@ import {
 import {
   Notifications as NotificationsIcon,
   Help as HelpIcon,
-  Settings as SettingsIcon,
   Menu as MenuIcon,
 } from "@mui/icons-material";
 import Image from "next/image";
@@ -65,18 +64,19 @@ export function Header({ onSidebarToggle }: HeaderProps) {
             <HelpIcon />
           </IconButton>
 
-          <IconButton size="large" aria-label="settings" color="inherit">
-            <SettingsIcon />
-          </IconButton>
-
           <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
-            <Avatar alt="John Doe" src="/placeholder.svg?height=32&width=32" />
+            <Avatar>
+              {"John Doe"
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </Avatar>
             <Typography
               variant="body2"
               sx={{
                 ml: 1,
-                fontWeight: "medium",
-                display: { xs: "none", md: "block" },
+                fontWeight: "bold",
+                display: { sm: "none", md: "block" },
               }}
             >
               John Doe
