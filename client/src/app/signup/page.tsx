@@ -25,13 +25,9 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 // Validation schema
 const SignupSchema = Yup.object().shape({
   firstName: Yup.string()
-    .min(2, "Too Short!")
     .max(50, "Too Long!")
     .required("First name is required"),
-  lastName: Yup.string()
-    .min(2, "Too Short!")
-    .max(50, "Too Long!")
-    .required("Last name is required"),
+  lastName: Yup.string().max(50, "Too Long!").required("Last name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string()
     .min(8, "Password must be at least 8 characters")
