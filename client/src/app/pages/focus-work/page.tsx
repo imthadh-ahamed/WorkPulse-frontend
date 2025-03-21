@@ -58,7 +58,7 @@ const employees = [
 
 export default function EmployeeManagementPage() {
   return (
-    <Container maxWidth="xl">
+    <Container maxWidth="lg">
       <Box
         sx={{
           display: "flex",
