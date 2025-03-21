@@ -56,7 +56,7 @@ export default function ProjectManagementPage() {
         {paginatedProjects.map((project) => (
           <Grid item xs={12} sm={6} md={4} key={project.id}>
             <Link
-              href={`/project-management/${project.id}/${project.displayName}`}
+              href={`/pages/project-management/${project.id}/${project.displayName}`}
               passHref
             >
               <Card>
