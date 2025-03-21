@@ -4,7 +4,6 @@ import {
   Container,
   Grid,
   Typography,
-  Link,
   Box,
   IconButton,
 } from "@mui/material";
@@ -25,8 +24,8 @@ export function Footer() {
     >
       <Toolbar sx={{ py: 2 }}>
         <Container maxWidth="xl">
-          <Grid container spacing={4}>
-            <Grid item xs={12} sm={4}>
+          <Grid container spacing={4} justifyContent="space-between">
+            <Grid item xs={12} sm={6}>
               <Typography variant="h6" color="text.primary" gutterBottom>
                 Work Pulse
               </Typography>
@@ -35,27 +34,7 @@ export function Footer() {
               </Typography>
             </Grid>
 
-            <Grid item xs={12} sm={4}>
-              <Typography variant="h6" color="text.primary" gutterBottom>
-                Quick Links
-              </Typography>
-              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                <Link href="/dashboard" color="text.secondary">
-                  Dashboard
-                </Link>
-                <Link href="/employee-management" color="text.secondary">
-                  Employees
-                </Link>
-                <Link href="/task-management" color="text.secondary">
-                  Tasks
-                </Link>
-                <Link href="/settings" color="text.secondary">
-                  Settings
-                </Link>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6}>
               <Box
                 sx={{
                   display: "flex",
