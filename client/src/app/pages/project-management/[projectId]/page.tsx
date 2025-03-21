@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Box, Typography, Container } from "@mui/material";
-import { projects } from "@/app/datas/Projects";
+import { projects } from "@/app/data/Projects";
 
 export default function ProjectTaskManagementPage({
   params,

@@ -16,83 +16,26 @@ import {
   Chip,
   TablePagination,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { useState } from "react";
 import { Employee } from "@/types/Employee";
-import { AddEmployeeModal } from "@/components/EmployeeManagement/AddEmplyeeModel";
+import { AddEmployeeModal } from "@/components/EmployeeManagement/AddEmployeeModel";
 import { ViewEmployeeModal } from "@/components/EmployeeManagement/ViewEmployeeModal";
-
-// Sample employee data
-const initialEmployees: Employee[] = [
-  {
-    id: 1,
-    firstName: "John",
-    lastName: "Doe",
-    email: "jhone@yopmail.com",
-    role: "Admin",
-  },
-  {
-    id: 2,
-    firstName: "Jane",
-    lastName: "Smith",
-    email: "jhone@yopmail.com",
-    role: "Employee",
-  },
-  {
-    id: 3,
-    firstName: "Robert",
-    lastName: "Johnson",
-    email: "jhone@yopmail.com",
-    role: "Employee",
-  },
-  {
-    id: 4,
-    firstName: "Emily",
-    lastName: "Davis",
-    email: "jhone@yopmail.com",
-    role: "Employee",
-  },
-  {
-    id: 5,
-    firstName: "Michael",
-    lastName: "Wilson",
-    email: "jhone@yopmail.com",
-    role: "Admin",
-  },
-  {
-    id: 6,
-    firstName: "Michael",
-    lastName: "Wilson",
-    email: "jhone@yopmail.com",
-    role: "Admin",
-  },
-  {
-    id: 7,
-    firstName: "Michael",
-    lastName: "Wilson",
-    email: "jhone@yopmail.com",
-    role: "Admin",
-  },
-  {
-    id: 8,
-    firstName: "Michael",
-    lastName: "Wilson",
-    email: "jhone@yopmail.com",
-    role: "Admin",
-  },
-];
+import { DeleteConfirmationModal } from "@/components/EmployeeManagement/DeleteConfirmationModal";
+import { Employees } from "@/app/data/Employee";
 
 export default function EmployeeManagementPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
+  const [employees, setEmployees] = useState<Employee[]>(Employees);
   const [viewEmployee, setViewEmployee] = useState<Employee | null>(null);
+  const [deleteEmployeeId, setDeleteEmployeeId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const handleAddEmployee = (AddEmployee: Omit<Employee, "id">) => {
+  const handleAddEmployee = (addEmployee: Omit<Employee, "id">) => {
     const newEmployee = {
       id: employees.length + 1,
-      ...AddEmployee,
+      ...addEmployee,
     };
     setEmployees([...employees, newEmployee]);
     setIsAddModalOpen(false);
@@ -104,6 +47,10 @@ export default function EmployeeManagementPage() {
 
   const handleCloseViewModal = () => {
     setViewEmployee(null);
+  };
+
+  const handleDeleteEmployee = (id: number) => {
+    setEmployees(employees.filter((employee) => employee.id !== id));
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -160,7 +107,7 @@ export default function EmployeeManagementPage() {
               </TableCell>
               <TableCell align="right">
                 <Typography variant="body1" fontWeight="bold">
-                  Action
+                  Actions
                 </Typography>
               </TableCell>
             </TableRow>
@@ -169,15 +116,12 @@ export default function EmployeeManagementPage() {
             {employees
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((employee) => (
-                <TableRow
-                  key={employee.id}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
+                <TableRow key={employee.id}>
                   <TableCell component="th" scope="row">
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
                         alt={`${employee.firstName} ${employee.lastName}`}
-                        src={`/images/placeholder.svg?height=40&width=40`}
+                        src={`/placeholder.svg?height=40&width=40`}
                       />
                       <Typography variant="body1">{`${employee.firstName} ${employee.lastName}`}</Typography>
                     </Box>
@@ -190,6 +134,12 @@ export default function EmployeeManagementPage() {
                       onClick={() => handleViewEmployee(employee)}
                     >
                       <Chip label="View" color="success" />
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={() => setDeleteEmployeeId(employee.id)}
+                    >
+                      <DeleteIcon color="error" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -218,6 +168,17 @@ export default function EmployeeManagementPage() {
           employee={viewEmployee}
           isOpen={!!viewEmployee}
           onClose={handleCloseViewModal}
+        />
+      )}
+
+      {deleteEmployeeId !== null && (
+        <DeleteConfirmationModal
+          isOpen={deleteEmployeeId !== null}
+          onClose={() => setDeleteEmployeeId(null)}
+          onConfirm={() => {
+            handleDeleteEmployee(deleteEmployeeId);
+            setDeleteEmployeeId(null);
+          }}
         />
       )}
     </Container>
