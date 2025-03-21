@@ -51,8 +51,8 @@ export function Sidebar({ mobileOpen, onDrawerToggle }: SidebarProps) {
       icon: <Users />,
     },
     {
-      title: "Task Management",
-      href: "/pages/task-management",
+      title: "Project Management",
+      href: "/pages/project-management",
       icon: <ClipboardList />,
     },
     {

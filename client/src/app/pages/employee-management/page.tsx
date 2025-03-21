@@ -19,8 +19,8 @@ import {
 import { Add as AddIcon } from "@mui/icons-material";
 import { useState } from "react";
 import { Employee } from "@/types/Employee";
-import { AddEmployeeModal } from "@/components/AddEmplyeeModel";
-import { ViewEmployeeModal } from "@/components/ViewEmployeeModal";
+import { AddEmployeeModal } from "@/components/EmployeeManagement/AddEmplyeeModel";
+import { ViewEmployeeModal } from "@/components/EmployeeManagement/ViewEmployeeModal";
 
 // Sample employee data
 const initialEmployees: Employee[] = [

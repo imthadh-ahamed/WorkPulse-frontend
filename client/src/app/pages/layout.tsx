@@ -4,9 +4,9 @@ import type React from "react";
 
 import { useState } from "react";
 import { Box, Toolbar } from "@mui/material";
-import { Header } from "../../components/Header";
-import { Sidebar } from "../../components/Sidebar";
-import { Footer } from "../../components/Footer";
+import { Header } from "../../components/common/Header";
+import { Sidebar } from "../../components/common/Sidebar";
+import { Footer } from "../../components/common/Footer";
 
 export default function MainLayout({
   children,
