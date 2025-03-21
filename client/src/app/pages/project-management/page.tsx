@@ -15,7 +15,7 @@ import {
   Pagination,
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
-import { projects } from "@/app/datas/Projects";
+import { projects } from "@/app/data/Projects";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -55,10 +55,7 @@ export default function ProjectManagementPage() {
       <Grid container spacing={4}>
         {paginatedProjects.map((project) => (
           <Grid item xs={12} sm={6} md={4} key={project.id}>
-            <Link
-              href={`/pages/project-management/${project.id}/${project.displayName}`}
-              passHref
-            >
+            <Link href={`/pages/project-management/${project.id}`} passHref>
               <Card>
                 <CardContent>
                   <Typography variant="h5" component="div">
