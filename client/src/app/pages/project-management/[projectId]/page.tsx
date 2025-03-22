@@ -1,13 +1,15 @@
 import { notFound } from "next/navigation";
 import { Box, Typography, Container } from "@mui/material";
 import { projects } from "@/app/data/Projects";
+import DashboardPage from "@/components/dashboard-page";
 
-export default function ProjectTaskManagementPage({
+export default async function ProjectTaskManagementPage({
   params,
 }: {
-  params: { projectId: string };
+  readonly params: { projectId: string };
 }) {
-  const project = projects.find((p) => p.id === Number(params.projectId));
+  const projectId = await params.projectId;
+  const project = projects.find((p) => p.id === Number(projectId));
 
   if (!project) {
     return notFound(); // This will show Next.js' built-in 404 page
@@ -20,6 +22,7 @@ export default function ProjectTaskManagementPage({
           {project.name} Task Management
         </Typography>
         {/* Add your task management content here */}
+        <DashboardPage />
       </Box>
     </Container>
   );

@@ -8,4 +8,5 @@ export interface Employee {
   position?: string | null;
   phone?: string | null;
   address?: string | null;
+  // Tenant ID
 }
