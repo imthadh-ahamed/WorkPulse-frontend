@@ -154,51 +154,47 @@ export default function ProjectManagementPage() {
 
       <Grid container spacing={4}>
         {paginatedProjects.map((project) => (
-          <Grid container spacing={4}>
-          {paginatedProjects.map((project) => (
-            <Grid item xs={12} sm={6} md={4} key={project.id}>
-                <Card>
-                  <CardContent>
-                    <Link href={`/pages/project-management/${project.id}`} passHref>
-                      <Typography variant="h5" component="div">
-                        {project.name}
-                      </Typography>
-                    </Link>
-                    <Typography variant="body2" color="text.secondary">
-                      {project.description}
-                    </Typography>
-                    <CardActions sx={{ justifyContent: "space-between", alignItems: "center", mt: 1 }}>
-                      <Chip
-                        label={project.isActive ? "Active" : "Inactive"}
-                        color={project.isActive ? "success" : "default"}
-                      />
-                      <Box>
-                        <Button
-                          size="small"
-                          startIcon={<EditIcon />}
-                          onClick={() => handleEditProject(project)} // Open Edit modal on click
-                          sx={{
-                            minWidth: "auto", // Remove extra padding
-                            padding: "6px", // Adjust padding for a compact look
-                          }}
-                        />
-                        <Button
-                          size="small"
-                          startIcon={<DeleteIcon />}
-                          color="error"
-                          onClick={() => handleOpenDeleteModal(project)} // Open Delete modal on click
-                          sx={{
-                            minWidth: "auto", // Remove extra padding
-                            padding: "6px", // Adjust padding for a compact look
-                          }}
-                        />
-                      </Box>
-                    </CardActions>
-                  </CardContent>
-                </Card>
-            </Grid>
-          ))}
-        </Grid>
+          <Grid item xs={12} sm={6} md={4} key={project.id}>
+            <Card>
+              <CardContent>
+                <Link href={`/pages/project-management/${project.id}`} passHref>
+                  <Typography variant="h5" component="div">
+                    {project.name}
+                  </Typography>
+                </Link>
+                <Typography variant="body2" color="text.secondary">
+                  {project.description}
+                </Typography>
+                <CardActions sx={{ justifyContent: "space-between", alignItems: "center", mt: 1 }}>
+                  <Chip
+                    label={project.isActive ? "Active" : "Inactive"}
+                    color={project.isActive ? "success" : "default"}
+                  />
+                  <Box>
+                    <Button
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={() => handleEditProject(project)} // Open Edit modal on click
+                      sx={{
+                        minWidth: "auto", // Remove extra padding
+                        padding: "6px", // Adjust padding for a compact look
+                      }}
+                    />
+                    <Button
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      color="error"
+                      onClick={() => handleOpenDeleteModal(project)} // Open Delete modal on click
+                      sx={{
+                        minWidth: "auto", // Remove extra padding
+                        padding: "6px", // Adjust padding for a compact look
+                      }}
+                    />
+                  </Box>
+                </CardActions>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
       </Grid>
 
