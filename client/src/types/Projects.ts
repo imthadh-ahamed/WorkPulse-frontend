@@ -12,4 +12,5 @@ export interface Project {
   modified?: Date | null;
   modifiedBy?: string | null;
   displayName: string;
+  //Tenant ID
 }

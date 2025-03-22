@@ -8,78 +8,84 @@ import {
   Grid,
   Container,
   Button,
-  Divider,
-  Avatar,
-  Chip,
+  Pagination,
   IconButton,
 } from "@mui/material";
 import {
   Add as AddIcon,
-  ThumbUp as ThumbUpIcon,
-  Comment as CommentIcon,
-  Share as ShareIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
 } from "@mui/icons-material";
-
-interface Announcement {
-  id: number;
-  title: string;
-  content: string;
-  author: string;
-  date: string;
-  category: string;
-  likes: number;
-  comments: number;
-}
-
-// Sample announcements data
-const announcements: Announcement[] = [
-  {
-    id: 1,
-    title: "Company Picnic",
-    content:
-      "Join us for the annual company picnic this Saturday! We'll have food, games, and activities for everyone. Families are welcome to attend.",
-    author: "HR Department",
-    date: "2023-09-10",
-    category: "Event",
-    likes: 24,
-    comments: 8,
-  },
-  {
-    id: 2,
-    title: "New Project Kickoff",
-    content:
-      "We're excited to announce the kickoff of our new project next week. Details will be shared in the upcoming team meeting.",
-    author: "Project Management",
-    date: "2023-09-08",
-    category: "Project",
-    likes: 15,
-    comments: 5,
-  },
-  {
-    id: 3,
-    title: "Office Renovation",
-    content:
-      "The office renovation will begin next month. During this time, some teams will be temporarily relocated. More information will be provided soon.",
-    author: "Facilities Management",
-    date: "2023-09-05",
-    category: "Facilities",
-    likes: 10,
-    comments: 12,
-  },
-  {
-    id: 4,
-    title: "New Health Benefits",
-    content:
-      "We're pleased to announce new health benefits for all employees starting next quarter. Check your email for details about the updated coverage.",
-    author: "Benefits Team",
-    date: "2023-09-01",
-    category: "Benefits",
-    likes: 32,
-    comments: 7,
-  },
-];
+import { useState } from "react";
+import { Announcement } from "@/types/Announcement";
+import { AddAnnouncementModal } from "@/components/Announcement/AddAnnouncementModal";
+import { EditAnnouncementModal } from "@/components/Announcement/EditAnnouncementModal";
+import { announcements } from "@/app/data/Announcement";
+import { DeleteAnnouncementModal } from "@/components/Announcement/DeleteAnnouncementModal";
 
 export default function AnnouncementsPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [announcementList, setAnnouncementList] = useState(announcements);
+  const [selectedAnnouncement, setSelectedAnnouncement] =
+    useState<Announcement | null>(null);
+  const announcementsPerPage = 4;
+
+  const handleChangePage = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setCurrentPage(value);
+  };
+
+  const handleAddAnnouncement = (newAnnouncement: Omit<Announcement, "id">) => {
+    const newId = announcementList.length + 1;
+    const announcementWithId = { id: newId, ...newAnnouncement };
+    setAnnouncementList([...announcementList, announcementWithId]);
+    setIsAddModalOpen(false);
+  };
+
+  const handleEditAnnouncement = (updatedAnnouncement: Announcement) => {
+    const updatedList = announcementList.map((announcement) =>
+      announcement.id === updatedAnnouncement.id
+        ? updatedAnnouncement
+        : announcement
+    );
+    setAnnouncementList(updatedList);
+    setIsEditModalOpen(false);
+  };
+
+  const handleDeleteAnnouncement = () => {
+    if (selectedAnnouncement) {
+      const updatedList = announcementList.filter(
+        (announcement) => announcement.id !== selectedAnnouncement.id
+      );
+      setAnnouncementList(updatedList);
+      setIsDeleteModalOpen(false);
+      setSelectedAnnouncement(null);
+    }
+  };
+
+  const handleOpenEditModal = (announcement: Announcement) => {
+    setSelectedAnnouncement(announcement);
+    setIsEditModalOpen(true);
+  };
+
+  const handleOpenDeleteModal = (announcement: Announcement) => {
+    setSelectedAnnouncement(announcement);
+    setIsDeleteModalOpen(true);
+  };
+
+  const indexOfLastAnnouncement = currentPage * announcementsPerPage;
+  const indexOfFirstAnnouncement =
+    indexOfLastAnnouncement - announcementsPerPage;
+  const currentAnnouncements = announcementList.slice(
+    indexOfFirstAnnouncement,
+    indexOfLastAnnouncement
+  );
+
   return (
     <Container maxWidth="xl">
       <Box
@@ -93,13 +99,17 @@ export default function AnnouncementsPage() {
         <Typography variant="h4" component="h1" fontWeight="bold">
           Announcements
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setIsAddModalOpen(true)}
+        >
           New Announcement
         </Button>
       </Box>
 
       <Grid container spacing={3}>
-        {announcements.map((announcement) => (
+        {currentAnnouncements.map((announcement) => (
           <Grid item xs={12} key={announcement.id}>
             <Card>
               <CardContent>
@@ -107,62 +117,73 @@ export default function AnnouncementsPage() {
                   sx={{
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    mb: 2,
+                    alignItems: "center",
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Avatar
-                      alt={announcement.author}
-                      src={`/placeholder.svg?height=40&width=40`}
-                    />
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        {announcement.author}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {new Date(announcement.date).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          }
-                        )}
-                      </Typography>
-                    </Box>
+                  <Typography variant="h6" gutterBottom fontWeight="bold">
+                    {announcement.title}
+                  </Typography>
+                  <Box>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleOpenEditModal(announcement)}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      color="secondary"
+                      onClick={() => handleOpenDeleteModal(announcement)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
                   </Box>
-                  <Chip label={announcement.category} size="small" />
                 </Box>
-
-                <Typography variant="h6" gutterBottom>
-                  {announcement.title}
-                </Typography>
-
                 <Typography variant="body1" paragraph>
-                  {announcement.content}
+                  {announcement.description}
                 </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Box sx={{ display: "flex", gap: 2 }}>
-                    <Button startIcon={<ThumbUpIcon />} size="small">
-                      {announcement.likes}
-                    </Button>
-                    <Button startIcon={<CommentIcon />} size="small">
-                      {announcement.comments}
-                    </Button>
-                  </Box>
-                  <IconButton>
-                    <ShareIcon />
-                  </IconButton>
-                </Box>
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
+
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mt: 4,
+        }}
+      >
+        <Pagination
+          count={Math.ceil(announcementList.length / announcementsPerPage)}
+          page={currentPage}
+          onChange={handleChangePage}
+          color="primary"
+        />
+      </Box>
+
+      <AddAnnouncementModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={handleAddAnnouncement}
+      />
+
+      {selectedAnnouncement && (
+        <EditAnnouncementModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleEditAnnouncement}
+          announcement={selectedAnnouncement}
+        />
+      )}
+
+      {selectedAnnouncement && (
+        <DeleteAnnouncementModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDeleteAnnouncement}
+        />
+      )}
     </Container>
   );
 }
