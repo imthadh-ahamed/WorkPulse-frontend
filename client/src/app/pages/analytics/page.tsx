@@ -1,33 +1,37 @@
-"use client";
+"use client"
 
-import type React from "react";
-
+import { useState } from "react"
 import {
   Box,
-  Typography,
   Card,
   CardContent,
-  Grid,
-  Container,
-  Tab,
+  CardHeader,
   Tabs,
-} from "@mui/material";
-import { useState } from "react";
+  Tab,
+  Typography,
+  Button,
+  CircularProgress,
+  Alert,
+  Container,
+  Grid,
+} from "@mui/material"
 import {
-  BarChart,
-  Bar,
+  Psychology, // Replacing BrainAlt with Psychology icon
+  Error as ErrorIcon,
+} from "@mui/icons-material"
+import {
   LineChart,
   Line,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
   Legend,
-  ResponsiveContainer,
-} from "recharts";
+} from "recharts"
+import { styled } from "@mui/material/styles"
 
 // Sample data for charts
 const productivityData = [
@@ -36,73 +40,126 @@ const productivityData = [
   { day: "Wed", score: 85 },
   { day: "Thu", score: 70 },
   { day: "Fri", score: 90 },
-];
+]
 
 const taskCompletionData = [
-  { name: "Completed", value: 75 },
-  { name: "In Progress", value: 15 },
-  { name: "Not Started", value: 10 },
-];
+  { name: "Completed", value: 75, color: "#0088FE" },
+  { name: "In Progress", value: 15, color: "#00C49F" },
+  { name: "Not Started", value: 10, color: "#FFBB28" },
+]
 
-const departmentPerformanceData = [
-  { department: "Engineering", performance: 85 },
-  { department: "Marketing", performance: 70 },
-  { department: "Sales", performance: 90 },
-  { department: "HR", performance: 75 },
-  { department: "Finance", performance: 80 },
-];
+// Custom styled components
+const StyledTab = styled(Tab)(({ theme }) => ({
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  minWidth: 120,
+}))
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
+// TabPanel component for tab content
+interface TabPanelProps {
+  children: React.ReactNode
+  value: number
+  index: number
+}
 
-export default function AnalyticsPage() {
-  const [tabValue, setTabValue] = useState(0);
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
 
   return (
-    <Container maxWidth="xl">
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`analytics-tabpanel-${index}`}
+      aria-labelledby={`analytics-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    </div>
+  )
+}
+
+export default function AnalyticsPage() {
+  const [activeTab, setActiveTab] = useState(0)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [predictions, setPredictions] = useState<{
+    productivityScore: number
+    suggestedTasks: string[]
+    insights: string[]
+  } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue)
+  }
+
+  const generatePredictions = async () => {
+    try {
+      setIsGenerating(true)
+      setError(null)
+
+      const response = await fetch("/data/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productivityData, taskCompletionData }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to generate predictions")
+      }
+
+      const data = await response.json()
+      setPredictions(data)
+    } catch (error) {
+      console.error("Error generating predictions:", error)
+      setError("Failed to generate predictions. Please try again.")
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
         Analytics
       </Typography>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
         <Tabs
-          value={tabValue}
+          value={activeTab}
           onChange={handleTabChange}
           aria-label="analytics tabs"
+          textColor="primary"
+          indicatorColor="primary"
         >
-          <Tab label="Overview" />
-          <Tab label="Productivity" />
-          <Tab label="Department" />
+          <StyledTab label="Overview" id="analytics-tab-0" />
+          <StyledTab label="Productivity" id="analytics-tab-1" />
+          <StyledTab label="Department" id="analytics-tab-2" />
         </Tabs>
       </Box>
 
-      {tabValue === 0 && (
+      {/* Overview Tab */}
+      <TabPanel value={activeTab} index={0}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Card>
+          {/* Weekly Productivity Score Chart */}
+          <Grid item xs={12} md={6}>
+            <Card elevation={2}>
+              <CardHeader title="Weekly Productivity Score" />
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Weekly Productivity Score
-                </Typography>
                 <Box sx={{ height: 300 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={productivityData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
+                    <LineChart data={productivityData}>
                       <XAxis dataKey="day" />
                       <YAxis />
-                      <Tooltip />
-                      <Legend />
+                      <RechartsTooltip />
                       <Line
                         type="monotone"
                         dataKey="score"
                         stroke="#8884d8"
-                        activeDot={{ r: 8 }}
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -111,12 +168,11 @@ export default function AnalyticsPage() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}>
-            <Card>
+          {/* Task Completion Status Chart */}
+          <Grid item xs={12} md={6}>
+            <Card elevation={2}>
+              <CardHeader title="Task Completion Status" />
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Task Completion Status
-                </Typography>
                 <Box sx={{ height: 300 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -128,15 +184,12 @@ export default function AnalyticsPage() {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                       >
                         {taskCompletionData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
@@ -145,40 +198,91 @@ export default function AnalyticsPage() {
             </Card>
           </Grid>
 
+          {/* AI Predictions and Suggestions */}
           <Grid item xs={12}>
-            <Card>
+            <Card elevation={2}>
+              <CardHeader title="AI Predictions and Suggestions" />
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Department Performance
-                </Typography>
-                <Box sx={{ height: 300 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={departmentPerformanceData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="department" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="performance" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Box>
+                {error && (
+                  <Alert severity="error" sx={{ mb: 2 }}>
+                    <ErrorIcon fontSize="small" sx={{ mr: 1 }} />
+                    {error}
+                  </Alert>
+                )}
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={generatePredictions}
+                  disabled={isGenerating}
+                  startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <Psychology />}
+                  sx={{ mb: 3 }}
+                >
+                  {isGenerating ? "Generating..." : "Generate Predictions"}
+                </Button>
+
+                {predictions ? (
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      Predicted Productivity Score: {predictions.productivityScore}
+                    </Typography>
+
+                    <Typography variant="subtitle1" fontWeight="medium" gutterBottom sx={{ mt: 2 }}>
+                      Suggested Tasks for Next Week:
+                    </Typography>
+                    <Box component="ul" sx={{ pl: 4 }}>
+                      {predictions.suggestedTasks.map((task, index) => (
+                        <li key={index}>
+                          <Typography variant="body1">{task}</Typography>
+                        </li>
+                      ))}
+                    </Box>
+
+                    <Typography variant="subtitle1" fontWeight="medium" gutterBottom sx={{ mt: 2 }}>
+                      Insights:
+                    </Typography>
+                    <Box component="ul" sx={{ pl: 4 }}>
+                      {predictions.insights.map((insight, index) => (
+                        <li key={index}>
+                          <Typography variant="body1">{insight}</Typography>
+                        </li>
+                      ))}
+                    </Box>
+                  </Box>
+                ) : (
+                  <Box sx={{ textAlign: "center", py: 4 }}>
+                    <Psychology sx={{ fontSize: 48, color: "text.disabled", mb: 2 }} />
+                    <Typography color="text.secondary">
+                      Click the button above to generate AI predictions based on your work patterns
+                    </Typography>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           </Grid>
         </Grid>
-      )}
+      </TabPanel>
 
-      {tabValue === 1 && (
-        <Typography variant="h6">Productivity analytics content</Typography>
-      )}
+      {/* Productivity Tab */}
+      <TabPanel value={activeTab} index={1}>
+        <Card elevation={2}>
+          <CardHeader title="Detailed Productivity Analysis" />
+          <CardContent>
+            <Typography variant="body1">Detailed productivity analytics content would go here.</Typography>
+          </CardContent>
+        </Card>
+      </TabPanel>
 
-      {tabValue === 2 && (
-        <Typography variant="h6">Department analytics content</Typography>
-      )}
+      {/* Department Tab */}
+      <TabPanel value={activeTab} index={2}>
+        <Card elevation={2}>
+          <CardHeader title="Department Analytics" />
+          <CardContent>
+            <Typography variant="body1">Department analytics content would go here.</Typography>
+          </CardContent>
+        </Card>
+      </TabPanel>
     </Container>
-  );
+  )
 }
+
