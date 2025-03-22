@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Box, Typography, Container } from "@mui/material";
 import { projects } from "@/app/data/Projects";
+import DashboardPage from "@/components/dashboard-page";
 
 export default function ProjectTaskManagementPage({
   params,
@@ -20,6 +21,7 @@ export default function ProjectTaskManagementPage({
           {project.name} Task Management
         </Typography>
         {/* Add your task management content here */}
+        <DashboardPage />
       </Box>
     </Container>
   );
