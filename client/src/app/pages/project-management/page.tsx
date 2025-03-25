@@ -15,17 +15,14 @@ import {
   Pagination,
   CardActions,
 } from "@mui/material";
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-} from "@mui/icons-material";
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { projects } from "@/app/data/Projects";
 import { AddProjectModal } from "@/components/ProjectManagement/AddProjectModel"; // Import Add modal
 import { EditProjectModal } from "@/components/ProjectManagement/EditProjectModel"; // Import Edit modal
 import { DeleteProjectConfirmationModal } from "@/components/ProjectManagement/DeleteConfirmationModel"; // Import Delete modal
 import type { Project } from "@/types/Projects";
 import { Employees } from "@/app/data/Employee";
+import { PlusCircle } from "lucide-react";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -152,7 +149,7 @@ export default function ProjectManagementPage() {
         </Typography>
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
+          startIcon={<PlusCircle />}
           onClick={handleAddProject} // Open Add modal on click
         >
           Add Project

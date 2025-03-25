@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { initialTasks } from "@/lib/data";
 import type { TaskData } from "@/lib/types";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import AzureDevOpsDashboard from "@/components/azure-devops-dashboard";
+import { SidebarProvider } from "@/components/TaskManagement/ui/sidebar";
+import AzureDevOpsDashboard from "@/components/TaskManagement/azure-devops-dashboard";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<TaskData[]>(initialTasks);
