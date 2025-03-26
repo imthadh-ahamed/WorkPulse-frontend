@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
 import {
   Button,
@@ -19,72 +19,100 @@ import {
   IconButton,
   Switch,
   FormControlLabel,
-} from "@mui/material"
-import type { Employee } from "@/types/Employee"
-import type { Project } from "@/types/Projects"
-import { Formik, Field, Form, ErrorMessage } from "formik"
-import * as Yup from "yup"
-import { Close as CloseIcon } from "@mui/icons-material"
-import { useState } from "react"
+  SelectChangeEvent,
+} from "@mui/material";
+import type { Employee } from "@/types/Employee";
+import type { Project } from "@/types/Projects";
+import { Formik, Field, Form, ErrorMessage, FormikErrors } from "formik";
+import * as Yup from "yup";
+import { Close as CloseIcon } from "@mui/icons-material";
+import { useState } from "react";
 
 interface AddProjectModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSave: (project: Omit<Project, "id" | "created" | "createdBy" | "modified" | "modifiedBy">) => void
-  employees: Employee[]
-  currentUser: string
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (
+    project: Omit<
+      Project,
+      "id" | "created" | "createdBy" | "modified" | "modifiedBy"
+    >
+  ) => void;
+  employees: Employee[];
+  currentUser: string;
 }
 
 const validationSchema = Yup.object({
-  name: Yup.string().max(100, "Project name can't exceed 100 characters").required("Project name is required"),
-  description: Yup.string().max(500, "Description can't exceed 500 characters").required("Description is required"),
-  displayName: Yup.string().max(100, "Display name can't exceed 100 characters").required("Display name is required"),
+  name: Yup.string()
+    .max(100, "Project name can't exceed 100 characters")
+    .required("Project name is required"),
+  description: Yup.string()
+    .max(500, "Description can't exceed 500 characters")
+    .required("Description is required"),
+  displayName: Yup.string()
+    .max(100, "Display name can't exceed 100 characters")
+    .required("Display name is required"),
   isActive: Yup.boolean().required("Status is required"),
   users: Yup.array().of(
     Yup.object().shape({
       id: Yup.number().required(),
-    }),
+    })
   ),
-})
+});
 
-const isFormValid = (errors: any, values: any) => {
-  return (
-    Object.keys(errors).length === 0 &&
-    values.name &&
-    values.description &&
-    values.displayName
-  )
-}
+export function AddProjectModal({
+  isOpen,
+  onClose,
+  onSave,
+  employees,
+  currentUser,
+}: AddProjectModalProps) {
+  const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
 
-export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUser }: AddProjectModalProps) {
-  const [selectedEmployees, setSelectedEmployees] = useState<number[]>([])
+  const isFormValid = (
+    errors: FormikErrors<{
+      name: string;
+      description: string;
+      displayName: string;
+      isActive: boolean;
+      users: Employee[];
+      closed?: Date | null;
+    }>,
+    values: { name: string; description: string; displayName: string }
+  ) => {
+    return (
+      Object.keys(errors).length === 0 &&
+      values.name &&
+      values.description &&
+      values.displayName
+    );
+  };
 
   const handleSave = (values: {
-    name: string
-    description: string
-    displayName: string
-    isActive: boolean
-    users: Employee[]
-    closed?: Date | null
+    name: string;
+    description: string;
+    displayName: string;
+    isActive: boolean;
+    users: Employee[];
+    closed?: Date | null;
   }) => {
     // Create a new project object
     const newProject = {
       ...values,
       created: new Date(),
       createdBy: currentUser,
-    }
+    };
 
-    onSave(newProject)
-  }
+    onSave(newProject);
+  };
 
   const handleClose = () => {
-    onClose()
-  }
+    onClose();
+  };
 
-  const handleEmployeeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const value = event.target.value as number[]
-    setSelectedEmployees(value)
-  }
+  const handleEmployeeChange = (event: SelectChangeEvent<number[]>) => {
+    const value = event.target.value as number[];
+    setSelectedEmployees(value);
+  };
 
   return (
     <Dialog open={isOpen} onClose={handleClose} maxWidth="md" fullWidth>
@@ -113,7 +141,14 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
           validationSchema={validationSchema}
           onSubmit={handleSave}
         >
-          {({ values, handleChange, handleBlur, setFieldValue, touched, errors }) => (
+          {({
+            values,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+            touched,
+            errors,
+          }) => (
             <Form>
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
@@ -194,7 +229,7 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
                         <Switch
                           checked={values.isActive}
                           onChange={(e) => {
-                            setFieldValue("isActive", e.target.checked)
+                            setFieldValue("isActive", e.target.checked);
                           }}
                           name="isActive"
                           color="primary"
@@ -212,25 +247,31 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
                         },
                       }}
                     >
-                      <InputLabel id="users-label">Assign Team Members</InputLabel>
+                      <InputLabel id="users-label">
+                        Assign Team Members
+                      </InputLabel>
                       <Select
                         labelId="users-label"
                         multiple
                         value={selectedEmployees}
-                        onChange={(e: any) => {
-                          handleEmployeeChange(e)
-                          const selectedIds = e.target.value as number[]
-                          const selectedUsers = employees.filter((emp) => selectedIds.includes(emp.id))
-                          setFieldValue("users", selectedUsers)
+                        onChange={(e: SelectChangeEvent<number[]>) => {
+                          handleEmployeeChange(e);
+                          const selectedIds = e.target.value as number[];
+                          const selectedUsers = employees.filter((emp) =>
+                            selectedIds.includes(emp.id)
+                          );
+                          setFieldValue("users", selectedUsers);
                         }}
                         renderValue={(selected) => {
                           const selectedNames = (selected as number[])
                             .map((id) => {
-                              const emp = employees.find((e) => e.id === id)
-                              return emp ? `${emp.firstName} ${emp.lastName}` : ""
+                              const emp = employees.find((e) => e.id === id);
+                              return emp
+                                ? `${emp.firstName} ${emp.lastName}`
+                                : "";
                             })
-                            .join(", ")
-                          return selectedNames
+                            .join(", ");
+                          return selectedNames;
                         }}
                         sx={{
                           borderRadius: "8px",
@@ -238,11 +279,14 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
                       >
                         {employees.map((employee) => (
                           <MenuItem key={employee.id} value={employee.id}>
-                            {employee.firstName} {employee.lastName} ({employee.role})
+                            {employee.firstName} {employee.lastName} (
+                            {employee.role})
                           </MenuItem>
                         ))}
                       </Select>
-                      <FormHelperText>Optional: Select team members for this project</FormHelperText>
+                      <FormHelperText>
+                        Optional: Select team members for this project
+                      </FormHelperText>
                     </FormControl>
                   </Grid>
                 </Grid>
@@ -266,9 +310,9 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
                   color="primary"
                   disabled={!isFormValid(errors, values)}
                   sx={{
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  padding: "8px 16px",
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    padding: "8px 16px",
                   }}
                 >
                   Create Project
@@ -279,6 +323,5 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
         </Formik>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Box,
   Card,
@@ -14,11 +14,11 @@ import {
   Alert,
   Container,
   Grid,
-} from "@mui/material"
+} from "@mui/material";
 import {
   Psychology, // Replacing BrainAlt with Psychology icon
   Error as ErrorIcon,
-} from "@mui/icons-material"
+} from "@mui/icons-material";
 import {
   LineChart,
   Line,
@@ -30,8 +30,8 @@ import {
   Pie,
   Cell,
   Legend,
-} from "recharts"
-import { styled } from "@mui/material/styles"
+} from "recharts";
+import { styled } from "@mui/material/styles";
 
 // Sample data for charts
 const productivityData = [
@@ -40,30 +40,30 @@ const productivityData = [
   { day: "Wed", score: 85 },
   { day: "Thu", score: 70 },
   { day: "Fri", score: 90 },
-]
+];
 
 const taskCompletionData = [
   { name: "Completed", value: 75, color: "#0088FE" },
   { name: "In Progress", value: 15, color: "#00C49F" },
   { name: "Not Started", value: 10, color: "#FFBB28" },
-]
+];
 
 // Custom styled components
-const StyledTab = styled(Tab)(({ theme }) => ({
+const StyledTab = styled(Tab)({
   fontWeight: 500,
   fontSize: "0.9rem",
   minWidth: 120,
-}))
+});
 
 // TabPanel component for tab content
 interface TabPanelProps {
-  children: React.ReactNode
-  value: number
-  index: number
+  children: React.ReactNode;
+  value: number;
+  index: number;
 }
 
 function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
+  const { children, value, index, ...other } = props;
 
   return (
     <div
@@ -75,27 +75,27 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
     </div>
-  )
+  );
 }
 
 export default function AnalyticsPage() {
-  const [activeTab, setActiveTab] = useState(0)
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [activeTab, setActiveTab] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [predictions, setPredictions] = useState<{
-    productivityScore: number
-    suggestedTasks: string[]
-    insights: string[]
-  } | null>(null)
-  const [error, setError] = useState<string | null>(null)
+    productivityScore: number;
+    suggestedTasks: string[];
+    insights: string[];
+  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue)
-  }
+    setActiveTab(newValue);
+  };
 
   const generatePredictions = async () => {
     try {
-      setIsGenerating(true)
-      setError(null)
+      setIsGenerating(true);
+      setError(null);
 
       const response = await fetch("/data/predict", {
         method: "POST",
@@ -103,21 +103,21 @@ export default function AnalyticsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ productivityData, taskCompletionData }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to generate predictions")
+        throw new Error("Failed to generate predictions");
       }
 
-      const data = await response.json()
-      setPredictions(data)
+      const data = await response.json();
+      setPredictions(data);
     } catch (error) {
-      console.error("Error generating predictions:", error)
-      setError("Failed to generate predictions. Please try again.")
+      console.error("Error generating predictions:", error);
+      setError("Failed to generate predictions. Please try again.");
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -184,7 +184,9 @@ export default function AnalyticsPage() {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
                       >
                         {taskCompletionData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -215,7 +217,13 @@ export default function AnalyticsPage() {
                   color="primary"
                   onClick={generatePredictions}
                   disabled={isGenerating}
-                  startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <Psychology />}
+                  startIcon={
+                    isGenerating ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <Psychology />
+                    )
+                  }
                   sx={{ mb: 3 }}
                 >
                   {isGenerating ? "Generating..." : "Generate Predictions"}
@@ -224,10 +232,16 @@ export default function AnalyticsPage() {
                 {predictions ? (
                   <Box>
                     <Typography variant="h6" gutterBottom>
-                      Predicted Productivity Score: {predictions.productivityScore}
+                      Predicted Productivity Score:{" "}
+                      {predictions.productivityScore}
                     </Typography>
 
-                    <Typography variant="subtitle1" fontWeight="medium" gutterBottom sx={{ mt: 2 }}>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="medium"
+                      gutterBottom
+                      sx={{ mt: 2 }}
+                    >
                       Suggested Tasks for Next Week:
                     </Typography>
                     <Box component="ul" sx={{ pl: 4 }}>
@@ -238,7 +252,12 @@ export default function AnalyticsPage() {
                       ))}
                     </Box>
 
-                    <Typography variant="subtitle1" fontWeight="medium" gutterBottom sx={{ mt: 2 }}>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="medium"
+                      gutterBottom
+                      sx={{ mt: 2 }}
+                    >
                       Insights:
                     </Typography>
                     <Box component="ul" sx={{ pl: 4 }}>
@@ -251,9 +270,12 @@ export default function AnalyticsPage() {
                   </Box>
                 ) : (
                   <Box sx={{ textAlign: "center", py: 4 }}>
-                    <Psychology sx={{ fontSize: 48, color: "text.disabled", mb: 2 }} />
+                    <Psychology
+                      sx={{ fontSize: 48, color: "text.disabled", mb: 2 }}
+                    />
                     <Typography color="text.secondary">
-                      Click the button above to generate AI predictions based on your work patterns
+                      Click the button above to generate AI predictions based on
+                      your work patterns
                     </Typography>
                   </Box>
                 )}
@@ -268,7 +290,9 @@ export default function AnalyticsPage() {
         <Card elevation={2}>
           <CardHeader title="Detailed Productivity Analysis" />
           <CardContent>
-            <Typography variant="body1">Detailed productivity analytics content would go here.</Typography>
+            <Typography variant="body1">
+              Detailed productivity analytics content would go here.
+            </Typography>
           </CardContent>
         </Card>
       </TabPanel>
@@ -278,11 +302,12 @@ export default function AnalyticsPage() {
         <Card elevation={2}>
           <CardHeader title="Department Analytics" />
           <CardContent>
-            <Typography variant="body1">Department analytics content would go here.</Typography>
+            <Typography variant="body1">
+              Department analytics content would go here.
+            </Typography>
           </CardContent>
         </Card>
       </TabPanel>
     </Container>
-  )
+  );
 }
-

@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    // Parse the request body
-    const body = await request.json();
+    // Parse the request body (currently not used)
+    await request.json(); // Parse the request body (currently not used)
 
     // In a real application, this would use an ML model to analyze the data
     // For now, we'll generate some mock predictions
@@ -61,10 +61,13 @@ export async function POST(request: Request) {
       "Prepare a case study for a successful project",
       "Identify and mitigate project risks",
       "Develop a training program for advanced skills",
-      "Create a wireframe for a new feature idea"
+      "Create a wireframe for a new feature idea",
     ];
-    
-    const suggestedTasks = Array.from({ length: 3 }, () => taskOptions[Math.floor(Math.random() * taskOptions.length)]);
+
+    const suggestedTasks = Array.from(
+      { length: 3 },
+      () => taskOptions[Math.floor(Math.random() * taskOptions.length)]
+    );
 
     // Generate insights based on work patterns
     const insightOptions = [
@@ -100,10 +103,13 @@ export async function POST(request: Request) {
       "Overloading your schedule impacts your ability to focus",
       "Your creativity declines when under constant time pressure",
       "Working late hours reduces your next-day performance",
-      "You are less effective when switching between unrelated tasks"
+      "You are less effective when switching between unrelated tasks",
     ];
-    
-    const insights = Array.from({ length: 3 }, () => insightOptions[Math.floor(Math.random() * insightOptions.length)]);
+
+    const insights = Array.from(
+      { length: 3 },
+      () => insightOptions[Math.floor(Math.random() * insightOptions.length)]
+    );
 
     // Simulate ML processing time
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -115,6 +121,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Error in predict API:", error);
-    return NextResponse.json({ error: "Failed to generate predictions" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to generate predictions" },
+      { status: 500 }
+    );
   }
 }
