@@ -15,13 +15,14 @@ import {
   Pagination,
   CardActions,
 } from "@mui/material";
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { projects } from "@/app/data/Projects";
 import { AddProjectModal } from "@/components/ProjectManagement/AddProjectModel"; // Import Add modal
 import { EditProjectModal } from "@/components/ProjectManagement/EditProjectModel"; // Import Edit modal
 import { DeleteProjectConfirmationModal } from "@/components/ProjectManagement/DeleteConfirmationModel"; // Import Delete modal
 import type { Project } from "@/types/Projects";
 import { Employees } from "@/app/data/Employee";
+import { PlusCircle } from "lucide-react";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -82,7 +83,10 @@ export default function ProjectManagementPage() {
   };
 
   const handleSaveProject = (
-    newProject: Omit<Project, "id" | "created" | "createdBy" | "modified" | "modifiedBy">
+    newProject: Omit<
+      Project,
+      "id" | "created" | "createdBy" | "modified" | "modifiedBy"
+    >
   ) => {
     if (editingProject) {
       // Update existing project
@@ -145,67 +149,85 @@ export default function ProjectManagementPage() {
         </Typography>
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
+          startIcon={<PlusCircle />}
           onClick={handleAddProject} // Open Add modal on click
         >
           Add Project
         </Button>
       </Box>
 
-      <Grid container spacing={4}>
-        {paginatedProjects.map((project) => (
-          <Grid item xs={12} sm={6} md={4} key={project.id}>
-            <Card>
-              <CardContent>
-                <Link href={`/pages/project-management/${project.id}`} passHref>
-                  <Typography variant="h5" component="div">
-                    {project.name}
-                  </Typography>
-                </Link>
-                <Typography variant="body2" color="text.secondary">
-                  {project.description}
-                </Typography>
-                <CardActions sx={{ justifyContent: "space-between", alignItems: "center", mt: 1 }}>
-                  <Chip
-                    label={project.isActive ? "Active" : "Inactive"}
-                    color={project.isActive ? "success" : "default"}
-                  />
-                  <Box>
-                    <Button
-                      size="small"
-                      startIcon={<EditIcon />}
-                      onClick={() => handleEditProject(project)} // Open Edit modal on click
+      {projectList.length === 0 ? (
+        <Typography variant="h6" color="text.secondary" align="center">
+          No projects available. Click &quot;Add Project&quot; to create a new
+          project.
+        </Typography>
+      ) : (
+        <>
+          <Grid container spacing={4}>
+            {paginatedProjects.map((project) => (
+              <Grid item xs={12} sm={6} md={4} key={project.id}>
+                <Card>
+                  <CardContent>
+                    <Link
+                      href={`/pages/project-management/${project.id}`}
+                      passHref
+                    >
+                      <Typography variant="h5" component="div">
+                        {project.name}
+                      </Typography>
+                    </Link>
+                    <Typography variant="body2" color="text.secondary">
+                      {project.description}
+                    </Typography>
+                    <CardActions
                       sx={{
-                        minWidth: "auto", // Remove extra padding
-                        padding: "6px", // Adjust padding for a compact look
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mt: 1,
                       }}
-                    />
-                    <Button
-                      size="small"
-                      startIcon={<DeleteIcon />}
-                      color="error"
-                      onClick={() => handleOpenDeleteModal(project)} // Open Delete modal on click
-                      sx={{
-                        minWidth: "auto", // Remove extra padding
-                        padding: "6px", // Adjust padding for a compact look
-                      }}
-                    />
-                  </Box>
-                </CardActions>
-              </CardContent>
-            </Card>
+                    >
+                      <Chip
+                        label={project.isActive ? "Active" : "Inactive"}
+                        color={project.isActive ? "success" : "default"}
+                      />
+                      <Box>
+                        <Button
+                          size="small"
+                          startIcon={<EditIcon />}
+                          onClick={() => handleEditProject(project)} // Open Edit modal on click
+                          sx={{
+                            minWidth: "auto", // Remove extra padding
+                            padding: "6px", // Adjust padding for a compact look
+                          }}
+                        />
+                        <Button
+                          size="small"
+                          startIcon={<DeleteIcon />}
+                          color="error"
+                          onClick={() => handleOpenDeleteModal(project)} // Open Delete modal on click
+                          sx={{
+                            minWidth: "auto", // Remove extra padding
+                            padding: "6px", // Adjust padding for a compact look
+                          }}
+                        />
+                      </Box>
+                    </CardActions>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
 
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <Pagination
-          count={Math.ceil(projectList.length / ITEMS_PER_PAGE)}
-          page={page}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </Box>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <Pagination
+              count={Math.ceil(projectList.length / ITEMS_PER_PAGE)}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+            />
+          </Box>
+        </>
+      )}
 
       {/* AddProjectModal */}
       <AddProjectModal

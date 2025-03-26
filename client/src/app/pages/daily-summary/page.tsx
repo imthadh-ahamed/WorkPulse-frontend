@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/TaskManagement/ui/card";
+import { Button } from "@/components/TaskManagement/ui/button";
+import { Input } from "@/components/TaskManagement/ui/input";
+import { Label } from "@/components/TaskManagement/ui/label";
+import { Separator } from "@/components/TaskManagement/ui/separator";
+import { Badge } from "@/components/TaskManagement/ui/badge";
 import { Clock, Mail, Send } from "lucide-react";
-import type { TaskData } from "@/lib/types";
-import { formatDate } from "@/lib/utils";
+import type { TaskData } from "@/components/TaskManagement/lib/types";
+import { formatDate } from "@/components/TaskManagement/lib/utils";
 import { Box, Container, Typography, Grid, Switch } from "@mui/material";
 
 interface DailySummaryPreviewProps {
