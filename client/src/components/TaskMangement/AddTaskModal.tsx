@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
-import type React from "react"
-
+import React, { useState } from "react";
 import {
   Button,
   Dialog,
@@ -17,69 +16,66 @@ import {
   Grid,
   Box,
   IconButton,
-  Switch,
-  FormControlLabel,
-} from "@mui/material"
-import type { Employee } from "@/types/Employee"
-import type { Project } from "@/types/Projects"
-import { Formik, Field, Form, ErrorMessage } from "formik"
-import * as Yup from "yup"
-import { Close as CloseIcon } from "@mui/icons-material"
-import { useState } from "react"
+} from "@mui/material";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { Close as CloseIcon } from "@mui/icons-material";
+import type { Employee } from "@/types/Employee";
 
-interface AddProjectModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSave: (project: Omit<Project, "id" | "created" | "createdBy" | "modified" | "modifiedBy">) => void
-  employees: Employee[]
+interface AddTaskModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (task: Omit<{ title: string; description: string; assignedTo: string; priority: string; status: string; deadline: string; }, "id" | "createdAt">) => void;
+  employees: Employee[];
   currentUser: string
 }
 
 const validationSchema = Yup.object({
-  name: Yup.string().max(100, "Project name can't exceed 100 characters").required("Project name is required"),
+  title: Yup.string().max(100, "Task title can't exceed 100 characters").required("Task title is required"),
   description: Yup.string().max(500, "Description can't exceed 500 characters").required("Description is required"),
-  displayName: Yup.string().max(100, "Display name can't exceed 100 characters").required("Display name is required"),
-  isActive: Yup.boolean().required("Status is required"),
-  users: Yup.array().of(
-    Yup.object().shape({
-      id: Yup.number().required(),
-    }),
-  ),
-})
+  assignedTo: Yup.string().required("Assigned employee is required"),
+  priority: Yup.string().required("Priority is required"),
+  status: Yup.string().required("Status is required"),
+  deadline: Yup.date()
+    .min(new Date(), "Deadline cannot be in the past")
+    .required("Deadline is required"),
+});
 
-const isFormValid = (errors: any, values: any) => {
+const isFormValid = (values: any) => {
   return (
-    Object.keys(errors).length === 0 &&
-    values.name &&
+    values.title &&
     values.description &&
-    values.displayName
-  )
-}
+    values.assignedTo &&
+    values.priority &&
+    values.status &&
+    values.deadline
+  );
+};
 
-export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUser }: AddProjectModalProps) {
+export function AddTaskModal({ isOpen, onClose, onSave, employees, currentUser }: AddTaskModalProps) {
   const [selectedEmployees, setSelectedEmployees] = useState<number[]>([])
-
   const handleSave = (values: {
-    name: string
-    description: string
-    displayName: string
-    isActive: boolean
-    users: Employee[]
-    closed?: Date | null
+    title: string;
+    description: string;
+    assignedTo: Employee[];
+    priority: string;
+    status: string;
+    deadline: string;
   }) => {
-    // Create a new project object
-    const newProject = {
+    // Create a new task object
+    const newTask = {
       ...values,
-      created: new Date(),
+      assignedTo: values.assignedTo.map((emp) => `${emp.firstName} ${emp.lastName}`).join(", "),
+      createdAt: new Date(),
       createdBy: currentUser,
-    }
+    };
 
-    onSave(newProject)
-  }
+    onSave(newTask);
+  };
 
   const handleClose = () => {
-    onClose()
-  }
+    onClose();
+  };
 
   const handleEmployeeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value as number[]
@@ -95,7 +91,7 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
           fontWeight: "bold",
         }}
       >
-        Add Project
+        Add Task
         <IconButton edge="end" color="inherit" onClick={handleClose}>
           <CloseIcon />
         </IconButton>
@@ -103,32 +99,32 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
       <DialogContent>
         <Formik
           initialValues={{
-            name: "",
+            title: "",
             description: "",
-            displayName: "",
-            isActive: true,
-            users: [],
-            closed: null,
+            assignedTo:[],
+            priority: "",
+            status: "",
+            deadline: "",
           }}
           validationSchema={validationSchema}
           onSubmit={handleSave}
         >
-          {({ values, handleChange, handleBlur, setFieldValue, touched, errors }) => (
+          {({ values, handleChange, handleBlur, touched, errors, setFieldValue }) => (
             <Form>
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Field
                       required
-                      name="name"
+                      name="title"
                       as={TextField}
-                      label="Project Name"
+                      label="Task Title"
                       fullWidth
-                      value={values.name}
+                      value={values.title}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.name && Boolean(errors.name)}
-                      helperText={<ErrorMessage name="name" />}
+                      error={touched.title && Boolean(errors.title)}
+                      helperText={<ErrorMessage name="title" />}
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "8px",
@@ -143,15 +139,17 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
                   <Grid item xs={12} sm={6}>
                     <Field
                       required
-                      name="displayName"
+                      name="deadline"
                       as={TextField}
-                      label="Display Name"
+                      label="Deadline"
+                      type="date"
                       fullWidth
-                      value={values.displayName}
+                      InputLabelProps={{ shrink: true }}
+                      value={values.deadline}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.displayName && Boolean(errors.displayName)}
-                      helperText={<ErrorMessage name="displayName" />}
+                      error={touched.deadline && Boolean(errors.deadline)}
+                      helperText={<ErrorMessage name="deadline" />}
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "8px",
@@ -188,30 +186,15 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
                       }}
                     />
                   </Grid>
-                  <Grid item xs={12}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={values.isActive}
-                          onChange={(e) => {
-                            setFieldValue("isActive", e.target.checked)
-                          }}
-                          name="isActive"
-                          color="primary"
-                        />
-                      }
-                      label="Active Project"
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <FormControl
-                      fullWidth
-                      sx={{
-                        "& .MuiInputLabel-root": {
-                          fontSize: "1.1rem",
-                        },
-                      }}
-                    >
+                  <Grid item xs={12} sm={6}>
+                     <FormControl
+                       fullWidth
+                       sx={{
+                         "& .MuiInputLabel-root": {
+                           fontSize: "1.1rem",
+                         },
+                       }}
+                     >
                       <InputLabel id="users-label">Assign Team Members</InputLabel>
                       <Select
                         labelId="users-label"
@@ -222,7 +205,7 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
                           const selectedIds = e.target.value as number[]
                           const selectedUsers = employees.filter((emp) => selectedIds.includes(emp.id))
                           setFieldValue("users", selectedUsers)
-                        }}
+                        }}                                                                                 
                         renderValue={(selected) => {
                           const selectedNames = (selected as number[])
                             .map((id) => {
@@ -234,15 +217,75 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
                         }}
                         sx={{
                           borderRadius: "8px",
-                        }}
+                        }}                        
                       >
                         {employees.map((employee) => (
                           <MenuItem key={employee.id} value={employee.id}>
                             {employee.firstName} {employee.lastName} ({employee.role})
                           </MenuItem>
-                        ))}
+                        ))}                                                        
                       </Select>
-                      <FormHelperText>Optional: Select team members for this project</FormHelperText>
+                      <FormHelperText>Optional: Select team members for this task</FormHelperText>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl
+                      fullWidth
+                      error={touched.priority && Boolean(errors.priority)}
+                      sx={{
+                        "& .MuiInputLabel-root": {
+                          fontSize: "1.1rem",
+                        },
+                      }}
+                    >
+                      <InputLabel id="priority-label">Priority</InputLabel>
+                      <Select
+                        labelId="priority-label"
+                        name="priority"
+                        value={values.priority}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        sx={{
+                          borderRadius: "8px",
+                        }}
+                      >
+                        <MenuItem value="Low">Low</MenuItem>
+                        <MenuItem value="Medium">Medium</MenuItem>
+                        <MenuItem value="High">High</MenuItem>
+                      </Select>
+                      <FormHelperText>
+                        <ErrorMessage name="priority" />
+                      </FormHelperText>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl
+                      fullWidth
+                      error={touched.status && Boolean(errors.status)}
+                      sx={{
+                        "& .MuiInputLabel-root": {
+                          fontSize: "1.1rem",
+                        },
+                      }}
+                    >
+                      <InputLabel id="status-label">Status</InputLabel>
+                      <Select
+                        labelId="status-label"
+                        name="status"
+                        value={values.status}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        sx={{
+                          borderRadius: "8px",
+                        }}
+                      >
+                        <MenuItem value="Not Started">Not Started</MenuItem>
+                        <MenuItem value="In Progress">In Progress</MenuItem>
+                        <MenuItem value="Completed">Completed</MenuItem>
+                      </Select>
+                      <FormHelperText>
+                        <ErrorMessage name="status" />
+                      </FormHelperText>
                     </FormControl>
                   </Grid>
                 </Grid>
@@ -264,14 +307,14 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
                   variant="contained"
                   type="submit"
                   color="primary"
-                  disabled={!isFormValid(errors, values)}
+                  disabled={!isFormValid(values)}
                   sx={{
                   textTransform: "none",
                   fontWeight: "bold",
                   padding: "8px 16px",
                   }}
                 >
-                  Create Project
+                  Create Task
                 </Button>
               </DialogActions>
             </Form>
@@ -279,6 +322,5 @@ export function AddProjectModal({ isOpen, onClose, onSave, employees, currentUse
         </Formik>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-
