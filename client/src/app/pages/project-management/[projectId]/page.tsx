@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Box, Typography, Container } from "@mui/material";
 import { projects } from "@/app/data/Projects";
-import DashboardPage from "@/components/dashboard-page";
+import DashboardPage from "@/components/TaskMangement/dashboard-page";
 
 export default async function ProjectTaskManagementPage({
   params,

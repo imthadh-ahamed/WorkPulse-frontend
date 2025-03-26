@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, CheckCircle2, Clock, MoreHorizontal, Trash2, Edit } from "lucide-react"
 import type { TaskData } from "@/lib/types"
 import { formatDate } from "@/lib/utils"
-
+import { EditTaskModal } from "./EditTaskModal"
 
 interface KanbanBoardProps {
   tasks: TaskData[]
@@ -18,8 +18,9 @@ interface KanbanBoardProps {
   onRemoveTask: (taskId: string) => void
 }
 
-export default function KanbanBoard({ tasks, onUpdateTask, onRemoveTask }: KanbanBoardProps) {
-  
+export default function KanbanBoard({ tasks = [], onUpdateTask, onRemoveTask }: KanbanBoardProps) {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<TaskData | null>(null)
 
   // Group tasks by status
   const columns = {
@@ -61,6 +62,11 @@ export default function KanbanBoard({ tasks, onUpdateTask, onRemoveTask }: Kanba
     onUpdateTask(updatedTask)
   }
 
+  const handleEditClick = (task: TaskData) => {
+    setSelectedTask(task)
+    setIsEditModalOpen(true)
+  }
+
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case "high":
@@ -91,8 +97,8 @@ export default function KanbanBoard({ tasks, onUpdateTask, onRemoveTask }: Kanba
               <div className="flex items-center justify-between mb-2 px-2">
                 <h3 className="font-medium text-sm">
                   {column.title}{" "}
-                  <Badge variant="outline" className="ml-1">
-                    {column.tasks.length}
+                  <Badge className="ml-1">
+                    {Array.isArray(column.tasks) ? column.tasks.length : 0}
                   </Badge>
                 </h3>
               </div>
@@ -127,12 +133,15 @@ export default function KanbanBoard({ tasks, onUpdateTask, onRemoveTask }: Kanba
 
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                      <Button className="h-6 w-6 p-0">
                                         <MoreHorizontal className="h-3 w-3" />
                                       </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="bg-white/80 backdrop-blur-sm shadow-md border rounded-md">
-                                      <DropdownMenuItem >
+                                    <DropdownMenuContent
+                                      align="end"
+                                      className="bg-white/80 backdrop-blur-sm shadow-md border rounded-md"
+                                    >
+                                      <DropdownMenuItem onClick={() => handleEditClick(task)}>
                                         <Edit className="mr-2 h-4 w-4" />
                                         Edit
                                       </DropdownMenuItem>
@@ -177,7 +186,21 @@ export default function KanbanBoard({ tasks, onUpdateTask, onRemoveTask }: Kanba
         </div>
       </DragDropContext>
 
-      
+      {/* Edit Task Modal */}
+      {selectedTask && (
+        <EditTaskModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={(updatedTask) => {
+            onUpdateTask(updatedTask)
+            setIsEditModalOpen(false)
+          }}
+          task={selectedTask}
+          employees={[]} 
+          //employees={Employees}
+          currentUser="Current User"
+        />
+      )}
     </div>
   )
 }
