@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import type { Employee } from "@/types/Employee";
 import type { Project } from "@/types/Projects";
-import { Formik, Field, Form, ErrorMessage } from "formik";
+import { Formik, Field, Form, ErrorMessage, FormikErrors } from "formik";
 import * as Yup from "yup";
 import { Close as CloseIcon } from "@mui/icons-material";
 import { useState } from "react";
@@ -67,6 +67,25 @@ export function AddProjectModal({
   currentUser,
 }: AddProjectModalProps) {
   const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
+
+  const isFormValid = (
+    errors: FormikErrors<{
+      name: string;
+      description: string;
+      displayName: string;
+      isActive: boolean;
+      users: Employee[];
+      closed?: Date | null;
+    }>,
+    values: { name: string; description: string; displayName: string }
+  ) => {
+    return (
+      Object.keys(errors).length === 0 &&
+      values.name &&
+      values.description &&
+      values.displayName
+    );
+  };
 
   const handleSave = (values: {
     name: string;
@@ -289,6 +308,7 @@ export function AddProjectModal({
                   variant="contained"
                   type="submit"
                   color="primary"
+                  disabled={!isFormValid(errors, values)}
                   sx={{
                     textTransform: "none",
                     fontWeight: "bold",

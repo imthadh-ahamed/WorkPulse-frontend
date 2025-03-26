@@ -1,9 +1,3 @@
-export interface WorkLog {
-  timestamp: string
-  description: string
-  hours: number
-}
-
 export interface TaskData {
   id: string
   title: string
@@ -13,6 +7,5 @@ export interface TaskData {
   status: string
   deadline: string
   createdAt: string
-  logs: WorkLog[]
 }
 
