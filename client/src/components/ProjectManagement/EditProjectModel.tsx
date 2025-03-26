@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
 import {
   Button,
@@ -19,47 +19,61 @@ import {
   IconButton,
   Switch,
   FormControlLabel,
-} from "@mui/material"
-import type { Employee } from "@/types/Employee"
-import type { Project } from "@/types/Projects"
-import { Formik, Field, Form, ErrorMessage } from "formik"
-import * as Yup from "yup"
-import { Close as CloseIcon } from "@mui/icons-material"
-import { useState, useEffect } from "react"
+  SelectChangeEvent,
+} from "@mui/material";
+import type { Employee } from "@/types/Employee";
+import type { Project } from "@/types/Projects";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { Close as CloseIcon } from "@mui/icons-material";
+import { useState, useEffect } from "react";
 
 interface EditProjectModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSave: (project: Project) => void
-  project: Project
-  employees: Employee[]
-  currentUser: string
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (project: Project) => void;
+  project: Project;
+  employees: Employee[];
+  currentUser: string;
 }
 
 const validationSchema = Yup.object({
-  name: Yup.string().max(100, "Project name can't exceed 100 characters").required("Project name is required"),
-  description: Yup.string().max(500, "Description can't exceed 500 characters").required("Description is required"),
-  displayName: Yup.string().max(100, "Display name can't exceed 100 characters").required("Display name is required"),
+  name: Yup.string()
+    .max(100, "Project name can't exceed 100 characters")
+    .required("Project name is required"),
+  description: Yup.string()
+    .max(500, "Description can't exceed 500 characters")
+    .required("Description is required"),
+  displayName: Yup.string()
+    .max(100, "Display name can't exceed 100 characters")
+    .required("Display name is required"),
   isActive: Yup.boolean().required("Status is required"),
   users: Yup.array().of(
     Yup.object().shape({
       id: Yup.number().required(),
-    }),
+    })
   ),
-})
+});
 
-export function EditProjectModal({ isOpen, onClose, onSave, project, employees, currentUser }: EditProjectModalProps) {
-  const [selectedEmployees, setSelectedEmployees] = useState<number[]>([])
+export function EditProjectModal({
+  isOpen,
+  onClose,
+  onSave,
+  project,
+  employees,
+  currentUser,
+}: EditProjectModalProps) {
+  const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
 
   // Initialize selected employees from project.users
   useEffect(() => {
     if (project && project.users && project.users.length > 0) {
-      const employeeIds = project.users.map((user) => user.id)
-      setSelectedEmployees(employeeIds)
+      const employeeIds = project.users.map((user) => user.id);
+      setSelectedEmployees(employeeIds);
     } else {
-      setSelectedEmployees([])
+      setSelectedEmployees([]);
     }
-  }, [project])
+  }, [project]);
 
   const handleSave = (values: Project) => {
     // Update the modified fields
@@ -67,19 +81,19 @@ export function EditProjectModal({ isOpen, onClose, onSave, project, employees, 
       ...values,
       modified: new Date(),
       modifiedBy: currentUser,
-    }
+    };
 
-    onSave(updatedProject)
-  }
+    onSave(updatedProject);
+  };
 
   const handleClose = () => {
-    onClose()
-  }
+    onClose();
+  };
 
-  const handleEmployeeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const value = event.target.value as number[]
-    setSelectedEmployees(value)
-  }
+  const handleEmployeeChange = (event: SelectChangeEvent<number[]>) => {
+    const value = event.target.value as number[];
+    setSelectedEmployees(value);
+  };
 
   return (
     <Dialog open={isOpen} onClose={handleClose} maxWidth="md" fullWidth>
@@ -114,7 +128,14 @@ export function EditProjectModal({ isOpen, onClose, onSave, project, employees, 
           onSubmit={handleSave}
           enableReinitialize
         >
-          {({ values, handleChange, handleBlur, setFieldValue, touched, errors }) => (
+          {({
+            values,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+            touched,
+            errors,
+          }) => (
             <Form>
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
@@ -195,13 +216,13 @@ export function EditProjectModal({ isOpen, onClose, onSave, project, employees, 
                         <Switch
                           checked={values.isActive}
                           onChange={(e) => {
-                            setFieldValue("isActive", e.target.checked)
+                            setFieldValue("isActive", e.target.checked);
                             // If project is being deactivated, set closed date
                             if (!e.target.checked && !values.closed) {
-                              setFieldValue("closed", new Date())
+                              setFieldValue("closed", new Date());
                             } else if (e.target.checked) {
                               // If project is being reactivated, clear closed date
-                              setFieldValue("closed", null)
+                              setFieldValue("closed", null);
                             }
                           }}
                           name="isActive"
@@ -225,20 +246,24 @@ export function EditProjectModal({ isOpen, onClose, onSave, project, employees, 
                         labelId="users-label"
                         multiple
                         value={selectedEmployees}
-                        onChange={(e: any) => {
-                          handleEmployeeChange(e)
-                          const selectedIds = e.target.value as number[]
-                          const selectedUsers = employees.filter((emp) => selectedIds.includes(emp.id))
-                          setFieldValue("users", selectedUsers)
+                        onChange={(e: SelectChangeEvent<number[]>) => {
+                          handleEmployeeChange(e);
+                          const selectedIds = e.target.value as number[];
+                          const selectedUsers = employees.filter((emp) =>
+                            selectedIds.includes(emp.id)
+                          );
+                          setFieldValue("users", selectedUsers);
                         }}
                         renderValue={(selected) => {
                           const selectedNames = (selected as number[])
                             .map((id) => {
-                              const emp = employees.find((e) => e.id === id)
-                              return emp ? `${emp.firstName} ${emp.lastName}` : ""
+                              const emp = employees.find((e) => e.id === id);
+                              return emp
+                                ? `${emp.firstName} ${emp.lastName}`
+                                : "";
                             })
-                            .join(", ")
-                          return selectedNames
+                            .join(", ");
+                          return selectedNames;
                         }}
                         sx={{
                           borderRadius: "8px",
@@ -246,24 +271,36 @@ export function EditProjectModal({ isOpen, onClose, onSave, project, employees, 
                       >
                         {employees.map((employee) => (
                           <MenuItem key={employee.id} value={employee.id}>
-                            {employee.firstName} {employee.lastName} ({employee.role})
+                            {employee.firstName} {employee.lastName} (
+                            {employee.role})
                           </MenuItem>
                         ))}
                       </Select>
-                      <FormHelperText>Manage team members for this project</FormHelperText>
+                      <FormHelperText>
+                        Manage team members for this project
+                      </FormHelperText>
                     </FormControl>
                   </Grid>
                   {/* Display creation and modification info */}
                   <Grid item xs={12}>
-                    <Box sx={{ mt: 2, color: "text.secondary", fontSize: "0.875rem" }}>
+                    <Box
+                      sx={{
+                        mt: 2,
+                        color: "text.secondary",
+                        fontSize: "0.875rem",
+                      }}
+                    >
                       {project?.created && (
                         <div>
-                          Created: {new Date(project.created).toLocaleString()} by {project.createdBy}
+                          Created: {new Date(project.created).toLocaleString()}{" "}
+                          by {project.createdBy}
                         </div>
                       )}
                       {project?.modified && project?.modifiedBy && (
                         <div>
-                          Last Modified: {new Date(project.modified).toLocaleString()} by {project.modifiedBy}
+                          Last Modified:{" "}
+                          {new Date(project.modified).toLocaleString()} by{" "}
+                          {project.modifiedBy}
                         </div>
                       )}
                     </Box>
@@ -301,6 +338,5 @@ export function EditProjectModal({ isOpen, onClose, onSave, project, employees, 
         </Formik>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-
