@@ -131,7 +131,7 @@ export default function AnnouncementsPage() {
                       <EditIcon />
                     </IconButton>
                     <IconButton
-                      color="secondary"
+                      sx={{ color: "red" }}
                       onClick={() => handleOpenDeleteModal(announcement)}
                     >
                       <DeleteIcon />
