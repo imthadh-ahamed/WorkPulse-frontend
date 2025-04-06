@@ -2,9 +2,10 @@ export interface FocusSession {
   id: string;
   tenantId: number;
   title: string;
-  startTime: string;
-  endTime: string;
+  focusHours: number;
+  endTime?: string;
   description: string;
+  isRunning?: boolean;
   created: Date;
   createdBy: string;
   modified?: Date | null;

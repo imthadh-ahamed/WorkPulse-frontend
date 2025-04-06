@@ -1,8 +1,7 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 import { useState } from "react";
-import { format, isAfter, isBefore, parseISO } from "date-fns";
 import { Plus, Edit, Trash2, Play } from "lucide-react";
 import {
   Button,
@@ -22,11 +21,14 @@ import AddFocusTimeModal from "@/components/FocusMode/AddFocusTimeModal";
 import EditFocusTimeModal from "@/components/FocusMode/EditFocusTimeModal";
 import { FocusSession } from "@/types/FocusSession";
 import { FocusSessions } from "@/app/data/FocusSessions";
-import { useToast } from "@/components/FocusMode/hooks/use-toast";
-import FocusTimer from "@/components/FocusMode/focus-timer";
 import { DeleteFocusTimeModal } from "@/components/FocusMode/DeleteFocusModal";
+import FocusTimer from "@/components/FocusMode/focus-timer";
+import {
+  FocusModeProvider,
+  useFocusMode,
+} from "@/components/FocusMode/FocusModeContext";
 
-export default function Home() {
+function FocusWorkPage() {
   const [focusSessions, setFocusSessions] =
     useState<FocusSession[]>(FocusSessions);
 
@@ -36,12 +38,10 @@ export default function Home() {
   const [currentSession, setCurrentSession] = useState<FocusSession | null>(
     null
   );
-  const [activeSession, setActiveSession] = useState<FocusSession | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const { toast } = useToast();
+  const { startSession } = useFocusMode();
 
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(8);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -58,8 +58,7 @@ export default function Home() {
     setCurrentSession({
       id: "",
       title: "",
-      startTime: "",
-      endTime: "",
+      focusHours: 0,
       description: "",
       tenantId: 0,
       created: new Date(),
@@ -85,103 +84,30 @@ export default function Home() {
       setFocusSessions(
         focusSessions.filter((session) => session.id !== currentSession.id)
       );
-      toast({
-        title: "Session deleted",
-        description: "The focus session has been removed from your schedule.",
-      });
     }
   };
 
   const handleStartSession = (session: FocusSession) => {
-    setActiveSession(session);
-    setIsPaused(false);
-    toast({
-      title: "Focus session started",
-      description: `${session.title} is now in progress. Stay focused!`,
-    });
-  };
+    if (!session.isRunning) {
+      // Start the session globally
+      startSession(session);
 
-  const handleSaveSession = (session: FocusSession) => {
-    // Validation
-    if (!session.title || !session.startTime || !session.endTime) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check if end time is after start time
-    if (isAfter(parseISO(session.startTime), parseISO(session.endTime))) {
-      toast({
-        title: "Invalid time range",
-        description: "End time must be after start time.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check for overlapping sessions
-    const hasOverlap = focusSessions.some((existingSession) => {
-      if (session.id && existingSession.id === session.id) return false;
-
-      const sessionStart = parseISO(existingSession.startTime);
-      const sessionEnd = parseISO(existingSession.endTime);
-      const newStart = parseISO(session.startTime);
-      const newEnd = parseISO(session.endTime);
-
-      return (
-        (isAfter(newStart, sessionStart) && isBefore(newStart, sessionEnd)) ||
-        (isAfter(newEnd, sessionStart) && isBefore(newEnd, sessionEnd)) ||
-        (isBefore(newStart, sessionStart) && isAfter(newEnd, sessionEnd))
-      );
-    });
-
-    if (hasOverlap) {
-      toast({
-        title: "Time conflict",
-        description: "This session overlaps with an existing focus time.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (session.id) {
-      // Update existing session
-      setFocusSessions(
-        focusSessions.map((existingSession) =>
-          existingSession.id === session.id ? session : existingSession
+      // Update the session's isRunning state
+      setFocusSessions((prevSessions) =>
+        prevSessions.map((s) =>
+          s.id === session.id ? { ...s, isRunning: true } : s
         )
       );
-      toast({
-        title: "Session updated",
-        description: "Your focus session has been updated successfully.",
-      });
-    } else {
-      // Add new session
-      const newSession = {
-        ...session,
-        id: Date.now().toString(),
-      };
-      setFocusSessions([...focusSessions, newSession]);
-      toast({
-        title: "Session created",
-        description: "New focus session has been added to your schedule.",
-      });
     }
-
-    setIsAddModalOpen(false);
-    setIsEditModalOpen(false);
   };
 
-  const handleEndSession = () => {
-    setActiveSession(null);
-    setIsPaused(false);
-    toast({
-      title: "Session ended",
-      description: "Your focus session has ended. Great job!",
-    });
+  const handleEndSession = (sessionId: string) => {
+    // Update the session's isRunning state to false
+    setFocusSessions((prevSessions) =>
+      prevSessions.map((s) =>
+        s.id === sessionId ? { ...s, isRunning: false } : s
+      )
+    );
   };
 
   return (
@@ -217,7 +143,7 @@ export default function Home() {
               </TableCell>
               <TableCell>
                 <Typography variant="body1" fontWeight="bold">
-                  Time
+                  Focus Hours
                 </Typography>
               </TableCell>
               <TableCell>
@@ -238,10 +164,7 @@ export default function Home() {
               .map((session) => (
                 <TableRow key={session.id}>
                   <TableCell>{session.title}</TableCell>
-                  <TableCell>
-                    {format(parseISO(session.startTime), "h:mm a")} -{" "}
-                    {format(parseISO(session.endTime), "h:mm a")}
-                  </TableCell>
+                  <TableCell>{session.focusHours} h</TableCell>
                   <TableCell>{session.description || "—"}</TableCell>
                   <TableCell align="right">
                     <Button
@@ -249,7 +172,7 @@ export default function Home() {
                       onClick={() => handleStartSession(session)}
                       sx={{ color: "green" }}
                     >
-                      <Play />
+                      {session.isRunning ? "Resume" : <Play />}
                     </Button>
                     <Button
                       size="small"
@@ -270,7 +193,7 @@ export default function Home() {
           </TableBody>
         </Table>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[8, 16, 24, 32, 40]}
           component="div"
           count={focusSessions.length}
           rowsPerPage={rowsPerPage}
@@ -284,7 +207,7 @@ export default function Home() {
       <AddFocusTimeModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSave={handleSaveSession}
+        onSave={(session) => setFocusSessions([...focusSessions, session])}
         session={currentSession}
       />
 
@@ -292,7 +215,11 @@ export default function Home() {
       <EditFocusTimeModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        onSave={handleSaveSession}
+        onSave={(session) =>
+          setFocusSessions(
+            focusSessions.map((s) => (s.id === session.id ? session : s))
+          )
+        }
         session={currentSession}
       />
 
@@ -304,14 +231,15 @@ export default function Home() {
       />
 
       {/* Floating Timer */}
-      {activeSession && (
-        <FocusTimer
-          session={activeSession}
-          isPaused={isPaused}
-          onPause={() => setIsPaused(!isPaused)}
-          onEnd={handleEndSession}
-        />
-      )}
+      <FocusTimer onEndSession={handleEndSession} />
     </Container>
+  );
+}
+
+export default function App() {
+  return (
+    <FocusModeProvider>
+      <FocusWorkPage />
+    </FocusModeProvider>
   );
 }

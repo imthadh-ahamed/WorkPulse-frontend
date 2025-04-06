@@ -26,8 +26,7 @@ interface EditFocusTimeModalProps {
 
 const validationSchema = Yup.object({
   title: Yup.string().required("Session title is required"),
-  startTime: Yup.string().required("Start time is required"),
-  endTime: Yup.string().required("End time is required"),
+  focusHours: Yup.number().required("Focus hours are required"),
   description: Yup.string(),
 });
 
@@ -40,8 +39,7 @@ export default function EditFocusTimeModal({
   const initialValues: FocusSession = session || {
     id: "",
     title: "",
-    startTime: "",
-    endTime: "",
+    focusHours: 0,
     description: "",
     tenantId: 0,
     created: new Date(),
@@ -102,41 +100,16 @@ export default function EditFocusTimeModal({
                   <Grid item xs={12}>
                     <Field
                       required
-                      name="startTime"
+                      name="focusHours"
                       as={TextField}
-                      type="datetime-local"
-                      label="Start Time"
+                      type="number"
+                      label="Focus Hours"
                       fullWidth
-                      value={values.startTime}
+                      value={values.focusHours}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.startTime && Boolean(errors.startTime)}
-                      helperText={<ErrorMessage name="startTime" />}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                        },
-                        "& .MuiInputLabel-root": {
-                          fontSize: "1.1rem",
-                          color: "#333",
-                        },
-                        mt: 2,
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      required
-                      name="endTime"
-                      as={TextField}
-                      type="datetime-local"
-                      label="End Time"
-                      fullWidth
-                      value={values.endTime}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.endTime && Boolean(errors.endTime)}
-                      helperText={<ErrorMessage name="endTime" />}
+                      error={touched.focusHours && Boolean(errors.focusHours)}
+                      helperText={<ErrorMessage name="focusHours" />}
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "8px",
