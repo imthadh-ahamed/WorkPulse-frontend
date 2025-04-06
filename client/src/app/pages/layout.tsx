@@ -1,12 +1,10 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Box, Toolbar } from "@mui/material";
-import { Header } from "../../components/common/Header";
-import { Sidebar } from "../../components/common/Sidebar";
-import { Footer } from "../../components/common/Footer";
+import { Header } from "@/components/common/Header";
+import { Sidebar } from "@/components/common/Sidebar";
+import { Footer } from "@/components/common/Footer";
 
 export default function MainLayout({
   children,
@@ -21,9 +19,14 @@ export default function MainLayout({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      {/* Header */}
       <Header onSidebarToggle={handleDrawerToggle} />
+      {/* Main Content */}
       <Box sx={{ display: "flex", flexGrow: 1 }}>
+        {/* Sidebar */}
         <Sidebar mobileOpen={mobileOpen} onDrawerToggle={handleDrawerToggle} />
+
+        {/* Page Content */}
         <Box
           component="main"
           sx={{
@@ -38,7 +41,9 @@ export default function MainLayout({
           {children}
         </Box>
       </Box>
+      {/* Footer */}
       <Footer />
+      {/* Global Focus Timer */}
     </Box>
   );
 }
