@@ -2,7 +2,7 @@
 
 import type React from "react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import {
@@ -21,6 +21,9 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import Image from "next/image";
 import "../globals.css";
+import { useLoginMutation } from "./services/auth/authApi";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Validation Schema for Formik
 const LoginSchema = Yup.object().shape({
@@ -34,12 +37,20 @@ const LoginSchema = Yup.object().shape({
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [login, { isLoading }] = useLoginMutation();
+  const [isStoreReady, setIsStoreReady] = useState(false);
 
   // These would be connected to a real authentication system in a production app
   const initialValues = {
-    email: "admin@example.com",
-    password: "password123",
+    email: "",
+    password: "",
   };
+
+  useEffect(() => {
+    // Simulate a delay to ensure the store is ready
+    const timeout = setTimeout(() => setIsStoreReady(true), 100);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -49,10 +60,33 @@ export default function LoginPage() {
     event.preventDefault();
   };
 
-  const handleSubmit = (values: { email: string; password: string }) => {
-    // In a real app, this would authenticate with a backend
-    console.log("Form submitted with:", values);
-    window.location.href = "/pages/dashboard";
+  const handleSubmit = async (values: { email: string; password: string }) => {
+    if (!isStoreReady) {
+      console.warn("Store is not ready yet.");
+      return;
+    }
+    try {
+      const response = await login(values);
+      toast.success("Login successful!");
+      console.log("Token:", response.data?.token);
+      // Save token to localStorage or context
+      if (response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+      } else {
+        console.error("Token is undefined");
+      }
+      window.location.href = "/pages/dashboard";
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Login failed:", error.message);
+        toast.error(
+          error.message || "Invalid email or password. Please try again."
+        );
+      } else {
+        console.error("An unexpected error occurred:", error);
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    }
   };
 
   return (
@@ -193,8 +227,9 @@ export default function LoginPage() {
                     fullWidth
                     variant="contained"
                     sx={{ mt: 3, mb: 2, py: 1.5 }}
+                    disabled={isLoading}
                   >
-                    Login
+                    {isLoading ? "Logging in..." : "Login"}
                   </Button>
                 </Form>
               )}
@@ -220,6 +255,7 @@ export default function LoginPage() {
             </Typography>
           </Box>
         </Container>
+        <ToastContainer />
       </Box>
     </Box>
   );
