@@ -22,6 +22,9 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "../globals.css";
 import Image from "next/image";
+import { useCreateTenantMutation } from "@/app/services/Tenant/tenantApi";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Validation Schema
 const validationSchema = Yup.object({
@@ -37,7 +40,7 @@ const validationSchema = Yup.object({
   password: Yup.string()
     .min(8, "Password must be at least 8 characters")
     .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-])[A-Za-z\d@$!%*?&]/,
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     )
     .required("Password is required"),
@@ -50,6 +53,8 @@ const validationSchema = Yup.object({
 export default function CreateOrganizationPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [createTenant, { isLoading, isSuccess, isError }] =
+    useCreateTenantMutation();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleClickShowConfirmPassword = () =>
@@ -70,10 +75,44 @@ export default function CreateOrganizationPage() {
     companyName: string;
   }
 
-  const handleSubmit = (values: FormValues) => {
-    console.log("Form values:", values);
-    // In a real app, this would create an organization and redirect
-    window.location.href = "/pages/dashboard";
+  // const handleSubmit = async (values: FormValues) => {
+  //   console.log("Submitting form with values:", values);
+  //   try {
+  //     const response = await axios.post(
+  //       "http://localhost:8081/api/tenant/create",
+  //       {
+  //         firstName: values.firstName,
+  //         lastName: values.lastName,
+  //         email: values.email,
+  //         password: values.password,
+  //         companyName: values.companyName,
+  //       }
+  //     );
+  //     console.log("Tenant created successfully:", response.data);
+  //     alert("Tenant created successfully!");
+  //     window.location.href = "/pages/dashboard";
+  //   } catch (error: unknown) {
+  //     if (axiosInstance.isAxiosError(error)) {
+  //       console.error(
+  //         "Error creating tenant:",
+  //         error.response?.data || error.message
+  //       );
+  //       alert("Failed to create tenant. Please try again.");
+  //     } else {
+  //       console.error("Unexpected error:", error);
+  //       alert("An unexpected error occurred. Please try again.");
+  //     }
+  //   }
+  // };
+
+  const handleSubmit = async (values: FormValues) => {
+    try {
+      await createTenant(values).unwrap();
+      toast.success("Tenant created successfully!");
+      window.location.href = "/pages/dashboard";
+    } catch (error) {
+      console.error("Failed to create tenant:", error);
+    }
   };
 
   return (
@@ -291,9 +330,20 @@ export default function CreateOrganizationPage() {
                     fullWidth
                     variant="contained"
                     sx={{ mt: 3, mb: 2, py: 1.5 }}
+                    disabled={isLoading}
                   >
-                    Create Organization
+                    {isLoading ? "Creating..." : "Create Organization"}
                   </Button>
+                  {isSuccess && (
+                    <Typography color="success.main">
+                      Tenant created successfully!
+                    </Typography>
+                  )}
+                  {isError && (
+                    <Typography color="error.main">
+                      Failed to create tenant. Please try again.
+                    </Typography>
+                  )}
                 </Form>
               )}
             </Formik>
@@ -318,6 +368,7 @@ export default function CreateOrganizationPage() {
             </Typography>
           </Box>
         </Container>
+        <ToastContainer />
       </Box>
     </Box>
   );

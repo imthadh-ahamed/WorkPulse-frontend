@@ -1,7 +1,11 @@
-import type { Metadata } from "next";
+"use client";
+
+// import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FocusModeProvider } from "@/components/FocusMode/FocusModeContext";
+import { Provider } from "react-redux";
+import { store } from "./middleware/store";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,10 +17,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Work Pulse",
-  description: "Work Pulse HR application",
-};
+// export const metadata: Metadata = {
+//   title: "Work Pulse",
+//   description: "Work Pulse HR application",
+// };
 
 export default function RootLayout({
   children,
@@ -29,7 +33,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <FocusModeProvider>{children}</FocusModeProvider>
+        <Provider store={store}>
+          <FocusModeProvider>{children}</FocusModeProvider>
+        </Provider>
       </body>
     </html>
   );
