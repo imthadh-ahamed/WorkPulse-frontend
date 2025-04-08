@@ -46,7 +46,7 @@ export default function SettingsPage() {
       <Card>
         <CardContent>
           {tabValue === 0 && <ProfileTab />}
-          {tabValue === 1 && <AccountTab />}
+          {tabValue === 1 && <AccountTab isAdmin={true} />}
           {tabValue === 2 && <PreferencesTab />}
           {tabValue === 3 && <NotificationsTab />}
           {tabValue === 4 && <SecurityTab />}

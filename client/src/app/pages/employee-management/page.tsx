@@ -30,7 +30,7 @@ export default function EmployeeManagementPage() {
   const [viewEmployee, setViewEmployee] = useState<Employee | null>(null);
   const [deleteEmployeeId, setDeleteEmployeeId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(7);
 
   const handleAddEmployee = (addEmployee: Omit<Employee, "id">) => {
     const newEmployee = {
@@ -147,7 +147,7 @@ export default function EmployeeManagementPage() {
           </TableBody>
         </Table>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[7, 14, 21]}
           component="div"
           count={employees.length}
           rowsPerPage={rowsPerPage}

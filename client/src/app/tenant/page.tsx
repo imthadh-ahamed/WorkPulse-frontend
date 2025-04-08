@@ -75,36 +75,6 @@ export default function CreateOrganizationPage() {
     companyName: string;
   }
 
-  // const handleSubmit = async (values: FormValues) => {
-  //   console.log("Submitting form with values:", values);
-  //   try {
-  //     const response = await axios.post(
-  //       "http://localhost:8081/api/tenant/create",
-  //       {
-  //         firstName: values.firstName,
-  //         lastName: values.lastName,
-  //         email: values.email,
-  //         password: values.password,
-  //         companyName: values.companyName,
-  //       }
-  //     );
-  //     console.log("Tenant created successfully:", response.data);
-  //     alert("Tenant created successfully!");
-  //     window.location.href = "/pages/dashboard";
-  //   } catch (error: unknown) {
-  //     if (axiosInstance.isAxiosError(error)) {
-  //       console.error(
-  //         "Error creating tenant:",
-  //         error.response?.data || error.message
-  //       );
-  //       alert("Failed to create tenant. Please try again.");
-  //     } else {
-  //       console.error("Unexpected error:", error);
-  //       alert("An unexpected error occurred. Please try again.");
-  //     }
-  //   }
-  // };
-
   const handleSubmit = async (values: FormValues) => {
     try {
       await createTenant(values).unwrap();
