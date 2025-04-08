@@ -2,6 +2,7 @@ import { Employee } from "./Employee";
 
 export interface Project {
   id: number;
+  tenantId: number;
   name: string;
   description: string;
   isActive: boolean;
@@ -12,5 +13,4 @@ export interface Project {
   modified?: Date | null;
   modifiedBy?: string | null;
   displayName: string;
-  //Tenant ID
 }

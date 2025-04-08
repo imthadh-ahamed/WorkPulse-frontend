@@ -1,5 +1,6 @@
 export interface Employee {
   id: number;
+  tenantId: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -8,5 +9,5 @@ export interface Employee {
   position?: string | null;
   phone?: string | null;
   address?: string | null;
-  // Tenant ID
+  isAdmin: boolean;
 }
