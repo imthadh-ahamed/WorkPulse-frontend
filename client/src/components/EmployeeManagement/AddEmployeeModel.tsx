@@ -20,11 +20,13 @@ import { Employee } from "@/types/Employee";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Close as CloseIcon } from "@mui/icons-material";
+import { toast } from "react-toastify";
+import { useInviteEmployeeMutation } from "@/app/services/Tenant/tenantApi";
 
 interface AddEmployeeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (employee: Omit<Employee, "id">) => void;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSave: (employee: Omit<Employee, "id">) => void;
 }
 
 const validationSchema = Yup.object({
@@ -49,13 +51,31 @@ export function AddEmployeeModal({
   onClose,
   onSave,
 }: AddEmployeeModalProps) {
-  const handleSave = (values: {
+  const [inviteEmployee, { isLoading }] = useInviteEmployeeMutation();
+
+  const handleSave = async (values: {
     firstName: string;
     lastName: string;
     email: string;
     role: string;
   }) => {
-    onSave(values); // Pass the form values to onSave callback
+    try {
+      await inviteEmployee(values).unwrap();
+      toast.success("Employee invited successfully!");
+      onSave({
+        ...values,
+        tenantId: localStorage.getItem("tenantId") || "",
+        isAdmin: values.role === "Admin", // Set isAdmin based on the role
+      });
+      onClose();
+    } catch (error) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "An unexpected error occurred. Please try again.";
+      toast.error(errorMessage);
+      console.error("Failed to invite employee:", error);
+      toast.error("Failed to invite employee. Please try again.");
+    }
   };
 
   const handleClose = () => {
@@ -217,8 +237,9 @@ export function AddEmployeeModal({
                     fontWeight: "bold",
                     padding: "8px 16px",
                   }}
+                  disabled={isLoading}
                 >
-                  Save
+                  {isLoading ? "Inviting..." : "Add Employee"}
                 </Button>
               </DialogActions>
             </Form>
