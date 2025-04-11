@@ -168,10 +168,7 @@ export default function ProjectManagementPage() {
               <Grid item xs={12} sm={6} md={4} key={project.id}>
                 <Card>
                   <CardContent>
-                    <Link
-                      href={`/pages/project-management/${project.id}`}
-                      passHref
-                    >
+                    <Link href={`/pages/projects/${project.id}`} passHref>
                       <Typography variant="h5" component="div">
                         {project.name}
                       </Typography>

@@ -45,12 +45,12 @@ export function Sidebar({ mobileOpen, onDrawerToggle }: SidebarProps) {
     },
     {
       title: "Employees",
-      href: "/pages/employee-management",
+      href: "/pages/employees",
       icon: <Users />,
     },
     {
       title: "Projects",
-      href: "/pages/project-management",
+      href: "/pages/projects",
       icon: <ClipboardList />,
     },
     {

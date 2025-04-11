@@ -2,7 +2,7 @@
 
 import type React from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import {
@@ -24,6 +24,7 @@ import "../globals.css";
 import { useLoginMutation } from "./services/auth/authApi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Cookies from "js-cookie";
 
 // Validation Schema for Formik
 const LoginSchema = Yup.object().shape({
@@ -38,19 +39,15 @@ const LoginSchema = Yup.object().shape({
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
-  const [isStoreReady, setIsStoreReady] = useState(false);
+  const cookieOptions = {
+    path: "/",
+  };
 
   // These would be connected to a real authentication system in a production app
   const initialValues = {
     email: "",
     password: "",
   };
-
-  useEffect(() => {
-    // Simulate a delay to ensure the store is ready
-    const timeout = setTimeout(() => setIsStoreReady(true), 100);
-    return () => clearTimeout(timeout);
-  }, []);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -61,31 +58,19 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async (values: { email: string; password: string }) => {
-    if (!isStoreReady) {
-      console.warn("Store is not ready yet.");
-      return;
-    }
     try {
-      const response = await login(values);
+      const response = await login(values).unwrap();
       toast.success("Login successful!");
-      console.log("Token:", response.data?.token);
-      // Save token to localStorage or context
-      if (response.data?.token) {
-        localStorage.setItem("token", response.data.token);
-      } else {
-        console.error("Token is undefined");
+      console.log("Token:", response.token);
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", response.token);
+        Cookies.set("token", JSON.stringify(response.token), cookieOptions);
+        window.location.href = "/pages/dashboard";
       }
-      window.location.href = "/pages/dashboard";
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error("Login failed:", error.message);
-        toast.error(
-          error.message || "Invalid email or password. Please try again."
-        );
-      } else {
-        console.error("An unexpected error occurred:", error);
-        toast.error("An unexpected error occurred. Please try again.");
-      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      toast.error("Invalid email or password. Please try again.");
     }
   };
 
