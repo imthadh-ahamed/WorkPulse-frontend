@@ -15,10 +15,7 @@ import {
   Container,
   Grid,
 } from "@mui/material";
-import {
-  Psychology, // Replacing BrainAlt with Psychology icon
-  Error as ErrorIcon,
-} from "@mui/icons-material";
+import { Psychology, Error as ErrorIcon } from "@mui/icons-material";
 import {
   LineChart,
   Line,
