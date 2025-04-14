@@ -64,7 +64,6 @@ export default function LoginPage() {
       console.log("Token:", response.token);
 
       if (typeof window !== "undefined") {
-        localStorage.setItem("token", response.token);
         Cookies.set("token", JSON.stringify(response.token), cookieOptions);
         window.location.href = "/pages/dashboard";
       }

@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Toolbar } from "@mui/material";
 import { Header } from "@/components/common/Header";
 import { Sidebar } from "@/components/common/Sidebar";
 import { Footer } from "@/components/common/Footer";
+import { useSelector, useDispatch } from "react-redux";
+import { isAdmin, userData } from "../redux/reducer/userSlice";
+import { getCurrentUser } from "../services/auth.service";
+import { RootState } from "../redux/store";
 
 export default function MainLayout({
   children,
@@ -12,7 +16,31 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user.userData);
 
+  useEffect(() => {
+    if (!user) {
+      getCurrentUser((res) => {
+        if (res?.status === 200 && res.data) {
+          dispatch(userData(res.data));
+          dispatch(isAdmin(res.data.isAdmin));
+        } else if (res?.status == 401) {
+          // logout
+          localStorage.removeItem("token");
+          window.location.href = "/";
+        } else {
+          // other error
+          console.error(
+            "An unexpected error occurred:",
+            res?.data || "Unknown error"
+          );
+          window.location.href = "/";
+
+        }
+      });
+    }
+  }, [user]);
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };

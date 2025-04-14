@@ -10,6 +10,7 @@ import {
 import { Employee } from "@/types/Employee";
 import { ExitToApp } from "@mui/icons-material";
 import { User } from "lucide-react";
+import Cookies from "js-cookie";
 
 interface ProfileMenuProps {
   anchorEl: null | HTMLElement;
@@ -89,7 +90,12 @@ export function ProfileMenu({
 
       {/* Logout */}
       <MenuItem
-        onClick={() => (window.location.href = "/")}
+        onClick={() => {
+          // Clear the token from localStorage or Cookies
+          localStorage.removeItem("token");
+          Cookies.remove("token", { path: "/" });
+          window.location.href = "/";
+        }}
         sx={{
           display: "flex",
           alignItems: "center",

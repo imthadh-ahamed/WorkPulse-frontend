@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Tenant } from "@/types/Tenants";
+import { Employee } from "@/types/Employee";
 
 export const tenantApi = createApi({
   reducerPath: "tenantApi",

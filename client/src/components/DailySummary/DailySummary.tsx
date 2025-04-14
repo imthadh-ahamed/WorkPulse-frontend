@@ -12,13 +12,13 @@ import type { TaskData } from "@/components/TaskManagement/lib/types";
 import { formatDate } from "@/components/TaskManagement/lib/utils";
 import { Box, Container, Typography, Grid, Switch } from "@mui/material";
 
-interface DailySummaryPreviewProps {
-  tasks: TaskData[];
+interface DailySummary {
+  readonly tasks: TaskData[];
 }
 
-export default function DailySummaryPreview({
+export default function DailySummary({
   tasks,
-}: DailySummaryPreviewProps) {
+}: DailySummary) {
   const [emailTime, setEmailTime] = useState("18:00");
   const [emailRecipients, setEmailRecipients] = useState("admin@example.com");
   const [includeCompleted, setIncludeCompleted] = useState(true);
