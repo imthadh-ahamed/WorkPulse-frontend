@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 import { useState } from "react";
 import { Plus, Edit, Trash2, Play } from "lucide-react";
 import {
