@@ -6,7 +6,6 @@ import { Button } from "@/components/TaskManagement/ui/button";
 import { Input } from "@/components/TaskManagement/ui/input";
 import { Label } from "@/components/TaskManagement/ui/label";
 import { Separator } from "@/components/TaskManagement/ui/separator";
-import { Badge } from "@/components/TaskManagement/ui/badge";
 import { Clock, Mail, Send } from "lucide-react";
 import type { TaskData } from "@/components/TaskManagement/lib/types";
 import { formatDate } from "@/components/TaskManagement/lib/utils";
@@ -30,9 +29,9 @@ export default function DailySummary({
 
   // Filter tasks based on settings
   const filteredTasks = (tasks ?? []).filter((task) => {
-    if (task.status === "completed" && !includeCompleted) return false;
-    if (task.status === "pending" && !includePending) return false;
-    if (task.status === "in-progress" && !includeInProgress) return false;
+    if (task.status === "Completed" && !includeCompleted) return false;
+    if (task.status === "Pending" && !includePending) return false;
+    if (task.status === "In Progress" && !includeInProgress) return false;
     return true;
   });
 
@@ -47,33 +46,19 @@ export default function DailySummary({
 
   // Calculate statistics
   const completedCount = filteredTasks.filter(
-    (t) => t.status === "completed"
+    (t) => t.status === "Completed"
   ).length;
   const pendingCount = filteredTasks.filter(
-    (t) => t.status === "pending"
+    (t) => t.status === "Pending"
   ).length;
   const inProgressCount = filteredTasks.filter(
-    (t) => t.status === "in-progress"
+    (t) => t.status === "In Progress"
   ).length;
   const totalCount = filteredTasks.length;
 
   // Calculate completion percentage
   const completionPercentage =
     totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-
-  // Get status badge with color
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <Badge className="bg-emerald-500 text-white">Completed</Badge>;
-      case "in-progress":
-        return <Badge className="bg-amber-500 text-white">In Progress</Badge>;
-      case "pending":
-        return <Badge className="bg-gray-500 text-white">Pending</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
 
   return (
     <Container maxWidth="xl">
@@ -293,79 +278,31 @@ export default function DailySummary({
                   <Typography variant="body2" color="textSecondary">
                     Task Completion: {completionPercentage}%
                   </Typography>
-                  <Box
+                    <Box
                     sx={{
                       width: "100%",
                       backgroundColor: "#e0e0e0",
                       borderRadius: "4px",
                       mt: 1,
                     }}
-                  >
+                    >
                     <Box
                       sx={{
-                        width: `${completionPercentage}%`,
-                        backgroundColor:
-                          "linear-gradient(to right, #f59e0b, #10b981)",
-                        height: "8px",
-                        borderRadius: "4px",
+                      width: `${completionPercentage}%`,
+                      backgroundColor:
+                        completionPercentage === 100
+                        ? "#10b981" // Green for 100% completion
+                        : completionPercentage >= 50
+                        ? "#f59e0b" // Amber for 50-99% completion
+                        : "#ef4444", // Red for less than 50% completion
+                      height: "8px",
+                      borderRadius: "4px",
                       }}
                     ></Box>
-                  </Box>
+                    </Box>
                 </Box>
 
                 <Separator style={{ margin: "16px 0" }} />
-
-                <Box sx={{ mt: 2 }}>
-                  {Object.keys(tasksByAssignee).length > 0 ? (
-                    Object.entries(tasksByAssignee).map(([assignee, tasks]) => (
-                      <Box key={assignee} sx={{ mt: 2 }}>
-                        <Typography
-                          variant="h6"
-                          component="h4"
-                          fontWeight="bold"
-                        >
-                          {assignee}
-                        </Typography>
-                        <ul>
-                          {tasks.map((task) => (
-                            <li
-                              key={task.id}
-                              className="flex items-center justify-between"
-                            >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 2,
-                                }}
-                              >
-                                <span
-                                  className={`w-2 h-2 rounded-full ${
-                                    task.priority === "high"
-                                      ? "bg-red-600"
-                                      : task.priority === "medium"
-                                      ? "bg-amber-500"
-                                      : "bg-emerald-500"
-                                  }`}
-                                ></span>
-                                <span>{task.title}</span>
-                              </Box>
-                              {getStatusBadge(task.status)}
-                            </li>
-                          ))}
-                        </ul>
-                      </Box>
-                    ))
-                  ) : (
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{ textAlign: "center", py: 4 }}
-                    >
-                      No tasks to display based on current filters
-                    </Typography>
-                  )}
-                </Box>
               </Box>
             </CardContent>
           </Card>

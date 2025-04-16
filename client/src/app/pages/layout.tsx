@@ -23,8 +23,10 @@ export default function MainLayout({
     if (!user) {
       getCurrentUser((res) => {
         if (res?.status === 200 && res.data) {
+          const tenantId = res.data.tenantId;
           dispatch(userData(res.data));
           dispatch(isAdmin(res.data.isAdmin));
+          localStorage.setItem("tenantId", tenantId);
         } else if (res?.status == 401) {
           // logout
           localStorage.removeItem("token");
@@ -35,7 +37,7 @@ export default function MainLayout({
             "An unexpected error occurred:",
             res?.data || "Unknown error"
           );
-          window.location.href = "/";
+          window.location.href = "/error";
 
         }
       });

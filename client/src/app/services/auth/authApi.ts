@@ -24,17 +24,6 @@ export const authApi = createApi({
         body: credentials,
       }),
     }),
-
-    // current user query — token is passed via headers automatically
-    // currentUser: builder.query<
-    //   { Employee }, // Expected response
-    //   void // No parameters needed
-    // >({
-    //   query: () => ({
-    //     url: "/current",
-    //     method: "GET",
-    //   }),
-    // }),
   }),
 });
 

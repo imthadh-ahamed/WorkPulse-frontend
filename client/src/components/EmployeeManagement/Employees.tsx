@@ -23,6 +23,8 @@ import { AddEmployeeModal } from "@/components/EmployeeManagement/AddEmployeeMod
 import { ViewEmployeeModal } from "@/components/EmployeeManagement/ViewEmployeeModal";
 import { DeleteConfirmationModal } from "@/components/EmployeeManagement/DeleteConfirmationModal";
 import { Employees } from "@/app/data/Employee";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 export default function EmployeeManagementPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -31,6 +33,7 @@ export default function EmployeeManagementPage() {
   const [deleteEmployeeId, setDeleteEmployeeId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(7);
+  const isAdmin = useSelector((state: RootState) => state.user.isAdmin);
 
   const handleAddEmployee = (addEmployee: Omit<Employee, "id">) => {
     const newEmployee = {
@@ -77,13 +80,15 @@ export default function EmployeeManagementPage() {
         <Typography variant="h4" component="h1" fontWeight="bold">
           Employee Management
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setIsAddModalOpen(true)}
-        >
-          Add Employee
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setIsAddModalOpen(true)}
+          >
+            Add Employee
+          </Button>
+        )}
       </Box>
 
       <TableContainer component={Paper}>
@@ -135,12 +140,14 @@ export default function EmployeeManagementPage() {
                     >
                       <Chip label="View" color="success" />
                     </Button>
-                    <Button
+                    {isAdmin && (
+                      <Button
                       size="small"
                       onClick={() => setDeleteEmployeeId(employee.id)}
-                    >
+                      >
                       <DeleteIcon color="error" />
-                    </Button>
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

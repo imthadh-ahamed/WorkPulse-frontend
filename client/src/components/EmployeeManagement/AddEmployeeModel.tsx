@@ -20,8 +20,9 @@ import { Employee } from "@/types/Employee";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { toast } from "react-toastify";
-import { useInviteEmployeeMutation } from "@/app/services/Tenant/tenantApi";
+import { toast, ToastContainer } from "react-toastify";
+import { inviteEmployee } from "@/app/services/auth.service";
+import "react-toastify/dist/ReactToastify.css";
 
 interface AddEmployeeModalProps {
   readonly isOpen: boolean;
@@ -30,12 +31,6 @@ interface AddEmployeeModalProps {
 }
 
 const validationSchema = Yup.object({
-  firstName: Yup.string()
-    .max(50, "First name can't exceed 50 characters")
-    .required("First name is required"),
-  lastName: Yup.string()
-    .max(50, "Last name can't exceed 50 characters")
-    .required("Last name is required"),
   email: Yup.string()
     .email("Invalid email address")
     .required("Email is required")
@@ -51,29 +46,25 @@ export function AddEmployeeModal({
   onClose,
   onSave,
 }: AddEmployeeModalProps) {
-  const [inviteEmployee, { isLoading }] = useInviteEmployeeMutation();
 
   const handleSave = async (values: {
-    firstName: string;
-    lastName: string;
     email: string;
     role: string;
   }) => {
     try {
-      await inviteEmployee(values).unwrap();
-      toast.success("Employee invited successfully!");
-      onSave({
-        ...values,
+      const employee = {
         tenantId: localStorage.getItem("tenantId") || "",
-        isAdmin: values.role === "Admin", // Set isAdmin based on the role
-      });
+        isAdmin: values.role === "Admin",
+        email: values.email,
+        role: values.role,
+      };
+
+      await inviteEmployee(employee);
+      toast.success("Employee invited successfully!");
+      onSave(employee);
       onClose();
     } catch (error) {
-      const errorMessage =
-        (error as { data?: { message?: string } })?.data?.message ||
-        "An unexpected error occurred. Please try again.";
-      toast.error(errorMessage);
-      console.error("Failed to invite employee:", error);
+      console.log("Error inviting employee:", error);
       toast.error("Failed to invite employee. Please try again.");
     }
   };
@@ -99,8 +90,6 @@ export function AddEmployeeModal({
       <DialogContent>
         <Formik
           initialValues={{
-            firstName: "",
-            lastName: "",
             email: "",
             role: "Employee",
           }}
@@ -111,52 +100,6 @@ export function AddEmployeeModal({
             <Form>
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Field
-                      required
-                      name="firstName"
-                      as={TextField}
-                      label="First Name"
-                      fullWidth
-                      value={values.firstName}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.firstName && Boolean(errors.firstName)}
-                      helperText={<ErrorMessage name="firstName" />}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                        },
-                        "& .MuiInputLabel-root": {
-                          fontSize: "1.1rem",
-                          color: "#333",
-                        },
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Field
-                      required
-                      name="lastName"
-                      as={TextField}
-                      label="Last Name"
-                      fullWidth
-                      value={values.lastName}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.lastName && Boolean(errors.lastName)}
-                      helperText={<ErrorMessage name="lastName" />}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                        },
-                        "& .MuiInputLabel-root": {
-                          fontSize: "1.1rem",
-                          color: "#333",
-                        },
-                      }}
-                    />
-                  </Grid>
                   <Grid item xs={12}>
                     <Field
                       required
@@ -237,15 +180,15 @@ export function AddEmployeeModal({
                     fontWeight: "bold",
                     padding: "8px 16px",
                   }}
-                  disabled={isLoading}
                 >
-                  {isLoading ? "Inviting..." : "Add Employee"}
+                  Add Employee
                 </Button>
               </DialogActions>
             </Form>
           )}
         </Formik>
       </DialogContent>
+      <ToastContainer />
     </Dialog>
   );
 }
