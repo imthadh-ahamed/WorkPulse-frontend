@@ -9,11 +9,8 @@ import {
   Grid,
   Container,
 } from "@mui/material";
-import { useSelector } from "react-redux";
 
 export default function DashboardPage() {
-  const isAdmin = useSelector((state) => state?.user?.isAdmin);
-  
   return (
     <Container maxWidth="xl">
       <Typography
@@ -34,7 +31,7 @@ export default function DashboardPage() {
             <CardContent>
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  Company Picnic {isAdmin ? 'aaaaaaaaaaaaaa' : ''}
+                  Company Picnic
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Join us for the annual company picnic this Saturday!

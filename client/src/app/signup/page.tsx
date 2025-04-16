@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import {
@@ -21,18 +21,20 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { toast, ToastContainer } from "react-toastify";
+import { signup } from "../services/auth.service";
 
 // Validation schema
 const SignupSchema = Yup.object().shape({
   firstName: Yup.string()
-    .max(50, "Too Long!")
+    .max(50, "First name is not exceeding 50 characters")
     .required("First name is required"),
-  lastName: Yup.string().max(50, "Too Long!").required("Last name is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
+  lastName: Yup.string().max(50, "Last name is not exceeding 50 characters").required("Last name is required"),
+  email: Yup.string().email("Invalid email").required("Email is required").max(250, "Email is not exceeding 250 characters"),
   password: Yup.string()
     .min(8, "Password must be at least 8 characters")
     .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&-/]/,
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     )
     .required("Password is required"),
@@ -43,6 +45,7 @@ const SignupSchema = Yup.object().shape({
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,6 +66,37 @@ export default function SignupPage() {
     email: "",
     password: "",
     confirmPassword: "",
+  };
+
+  const handleSignup = async (values: typeof initialValues) => {
+    const token = searchParams.get("token"); // Extract the token from the URL
+    if (!token) {
+      toast.error("Invalid or missing invitation token.");
+      return;
+    }
+
+    const signupData = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      password: values.password,
+      invitationToken: token, // Include the token in the signup request
+    };
+
+    try {
+      await signup(signupData);
+      toast.success("Signup successful! Redirecting to login...");
+      router.push("/"); // Redirect to login page
+    } catch (error: unknown) {
+      console.error("Error during signup:", error);
+      if (error instanceof Error && (error as { response?: { status: number } }).response?.status === 400) {
+        toast.error("Invalid signup details. Please check your input.");
+      } else if (error instanceof Error && (error as { response?: { status: number } }).response?.status === 409) {
+        toast.error("Email already exists. Please use a different email.");
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    }
   };
 
   return (
@@ -134,12 +168,7 @@ export default function SignupPage() {
               initialValues={initialValues}
               validationSchema={SignupSchema}
               onSubmit={(values, { setSubmitting }) => {
-                // In a real app, this would register the user and redirect
-                setTimeout(() => {
-                  console.log("Signup values:", values);
-                  router.push("/dashboard");
-                  setSubmitting(false);
-                }, 500);
+                handleSignup(values).finally(() => setSubmitting(false));
               }}
             >
               {({ isSubmitting, errors, touched }) => (
@@ -294,6 +323,7 @@ export default function SignupPage() {
             </Typography>
           </Box>
         </Container>
+        <ToastContainer />
       </Box>
     </Box>
   );
