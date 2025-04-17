@@ -138,7 +138,7 @@ export function ViewEmployeeModal({
               <Typography variant="body2" color="textSecondary">
                 Phone
               </Typography>
-              <Typography variant="body2">{employee.phone || "N/A"}</Typography>
+              <Typography variant="body2">{employee.phone || "-"}</Typography>
             </InfoRow>
 
             <InfoRow>
@@ -146,7 +146,7 @@ export function ViewEmployeeModal({
                 Address
               </Typography>
               <Typography variant="body2">
-                {employee.address || "N/A"}
+                {employee.address || "-"}
               </Typography>
             </InfoRow>
 
@@ -154,7 +154,7 @@ export function ViewEmployeeModal({
               <Typography variant="body2" color="textSecondary">
                 Bio
               </Typography>
-              <Typography variant="body2">{employee.bio || "N/A"}</Typography>
+              <Typography variant="body2">{employee.bio || "-"}</Typography>
             </InfoRow>
 
             <InfoRow>
@@ -162,7 +162,7 @@ export function ViewEmployeeModal({
                 Position
               </Typography>
               <Typography variant="body2">
-                {employee.position || "N/A"}
+                {employee.position || "-"}
               </Typography>
             </InfoRow>
           </div>

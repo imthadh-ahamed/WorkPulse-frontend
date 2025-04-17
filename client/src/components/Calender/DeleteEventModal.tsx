@@ -10,9 +10,9 @@ import {
 } from "@mui/material";
 
 interface DeleteEventModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onConfirm: () => void;
 }
 
 export function DeleteEventModal({

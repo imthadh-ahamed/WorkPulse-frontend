@@ -38,3 +38,14 @@ export const getAllEmployees = async (
         throw error;
     }
 };
+
+export const deleteEmployeeById = async (employeeId: string): Promise<void> => {
+  try {
+    const endpoint = `/employee/${employeeId}`;
+    await axiosInstance.delete(endpoint);
+    console.log("Employee deleted successfully");
+  } catch (error) {
+    console.log("Error deleting employee:", error);
+    throw error;
+  }
+};
