@@ -30,7 +30,9 @@ import { ViewEmployeeModal } from "@/components/EmployeeManagement/ViewEmployeeM
 import { DeleteConfirmationModal } from "@/components/EmployeeManagement/DeleteConfirmationModal";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
-import { getAllEmployees } from "@/app/services/Employee/employee.servics";
+import { deleteEmployeeById, getAllEmployees } from "@/app/services/Employee/employee.servics";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function EmployeeManagementPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -41,9 +43,11 @@ export default function EmployeeManagementPage() {
   const [rowsPerPage, setRowsPerPage] = useState(7);
   const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [totalEmployees, setTotalEmployees] = useState<number>(0);
   const isAdmin = useSelector((state: RootState) => state.user.isAdmin);
-  const tenantId = typeof window !== "undefined" ? localStorage.getItem("tenantId") ?? "" : "";
+  const tenantId =
+    typeof window !== "undefined" ? localStorage.getItem("tenantId") ?? "" : "";
 
   // Fetch employees dynamically
   useEffect(() => {
@@ -80,8 +84,19 @@ export default function EmployeeManagementPage() {
     setViewEmployee(null);
   };
 
-  const handleDeleteEmployee = (id: string) => {
-    setEmployees((employees ?? []).filter((employee) => employee.id !== id));
+  const handleDeleteEmployee = async (id: string) => {
+    setDeleteLoading(true);
+    try {
+      await deleteEmployeeById(id);
+      toast.success("Employee deleted successfully!"); // Show success toast
+      setEmployees((employees ?? []).filter((employee) => employee.id !== id)); // Update the UI
+      setTotalEmployees((prev) => prev - 1); // Decrease the total count
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      toast.error("Failed to delete employee. Please try again."); // Show error toast
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,14 +214,18 @@ export default function EmployeeManagementPage() {
                   <TableCell align="right">
                     <Button
                       size="small"
-                      onClick={() => employee.id && handleViewEmployee(employee.id)}
+                      onClick={() =>
+                        employee.id && handleViewEmployee(employee.id)
+                      }
                     >
                       <Chip label="View" color="success" />
                     </Button>
                     {isAdmin && (
                       <Button
                         size="small"
-                        onClick={() => employee.id && setDeleteEmployeeId(employee.id)}
+                        onClick={() =>
+                          employee.id && setDeleteEmployeeId(employee.id)
+                        }
                       >
                         <DeleteIcon color="error" />
                       </Button>
@@ -250,8 +269,10 @@ export default function EmployeeManagementPage() {
             handleDeleteEmployee(deleteEmployeeId);
             setDeleteEmployeeId(null);
           }}
+          loading={deleteLoading}
         />
       )}
+    <ToastContainer />
     </Container>
   );
 }
