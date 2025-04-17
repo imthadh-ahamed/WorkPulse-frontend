@@ -15,6 +15,7 @@ import {
   Grid,
   Box,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { Employee } from "@/types/Employee";
 import { Formik, Field, Form, ErrorMessage } from "formik";
@@ -23,6 +24,7 @@ import { Close as CloseIcon } from "@mui/icons-material";
 import { toast, ToastContainer } from "react-toastify";
 import { inviteEmployee } from "@/app/services/auth.service";
 import "react-toastify/dist/ReactToastify.css";
+import { useState } from "react";
 
 interface AddEmployeeModalProps {
   readonly isOpen: boolean;
@@ -46,11 +48,13 @@ export function AddEmployeeModal({
   onClose,
   onSave,
 }: AddEmployeeModalProps) {
+  const [loading, setLoading] = useState(false);
 
   const handleSave = async (values: {
     email: string;
     role: string;
   }) => {
+    setLoading(true);
     try {
       const employee = {
         tenantId: localStorage.getItem("tenantId") || "",
@@ -66,6 +70,8 @@ export function AddEmployeeModal({
     } catch (error) {
       console.log("Error inviting employee:", error);
       toast.error("Failed to invite employee. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -180,8 +186,10 @@ export function AddEmployeeModal({
                     fontWeight: "bold",
                     padding: "8px 16px",
                   }}
+                  disabled={loading}
+                  startIcon={loading && <CircularProgress size={20} />}
                 >
-                  Add Employee
+                  {loading ? "Inviting..." : "Invite Employee"}
                 </Button>
               </DialogActions>
             </Form>

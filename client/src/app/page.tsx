@@ -63,7 +63,7 @@ export default function LoginPage() {
       toast.success("Login successful!");
       console.log("Token:", response.token);
 
-      if (typeof window !== "undefined") {
+      if (response?.token) {
         Cookies.set("token", JSON.stringify(response.token), cookieOptions);
         window.location.href = "/pages/dashboard";
       }

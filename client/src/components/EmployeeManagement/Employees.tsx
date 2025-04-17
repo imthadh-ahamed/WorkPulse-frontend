@@ -15,45 +15,78 @@ import {
   Avatar,
   Chip,
   TablePagination,
+  CircularProgress,
+  TextField,
 } from "@mui/material";
-import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { useState } from "react";
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+} from "@mui/icons-material";
+import { useEffect, useState } from "react";
 import { Employee } from "@/types/Employee";
 import { AddEmployeeModal } from "@/components/EmployeeManagement/AddEmployeeModel";
 import { ViewEmployeeModal } from "@/components/EmployeeManagement/ViewEmployeeModal";
 import { DeleteConfirmationModal } from "@/components/EmployeeManagement/DeleteConfirmationModal";
-import { Employees } from "@/app/data/Employee";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
+import { getAllEmployees } from "@/app/services/Employee/employee.servics";
 
 export default function EmployeeManagementPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [employees, setEmployees] = useState<Employee[]>(Employees);
-  const [viewEmployee, setViewEmployee] = useState<Employee | null>(null);
-  const [deleteEmployeeId, setDeleteEmployeeId] = useState<number | null>(null);
+  const [employees, setEmployees] = useState<Employee[]>();
+  const [viewEmployee, setViewEmployee] = useState<string | null>(null);
+  const [deleteEmployeeId, setDeleteEmployeeId] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(7);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [search, setSearch] = useState<string>("");
+  const [totalEmployees, setTotalEmployees] = useState<number>(0);
   const isAdmin = useSelector((state: RootState) => state.user.isAdmin);
+  const tenantId = typeof window !== "undefined" ? localStorage.getItem("tenantId") ?? "" : "";
 
-  const handleAddEmployee = (addEmployee: Omit<Employee, "id">) => {
-    const newEmployee = {
-      id: employees.length + 1,
-      ...addEmployee,
+  // Fetch employees dynamically
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      setLoading(true);
+      try {
+        const { employees, total } = await getAllEmployees(
+          tenantId,
+          page + 1,
+          rowsPerPage,
+          search
+        );
+        setEmployees(employees);
+        setTotalEmployees(total);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-    setEmployees([...employees, newEmployee]);
+
+    fetchEmployees();
+  }, [tenantId, page, rowsPerPage, search]);
+
+  const handleAddEmployee = () => {
     setIsAddModalOpen(false);
   };
 
-  const handleViewEmployee = (employee: Employee) => {
-    setViewEmployee(employee);
+  const handleViewEmployee = (employeeId: string) => {
+    setViewEmployee(employeeId);
   };
 
   const handleCloseViewModal = () => {
     setViewEmployee(null);
   };
 
-  const handleDeleteEmployee = (id: number) => {
-    setEmployees(employees.filter((employee) => employee.id !== id));
+  const handleDeleteEmployee = (id: string) => {
+    setEmployees((employees ?? []).filter((employee) => employee.id !== id));
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+    setPage(0);
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -80,6 +113,33 @@ export default function EmployeeManagementPage() {
         <Typography variant="h4" component="h1" fontWeight="bold">
           Employee Management
         </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            position: "relative",
+            "&:hover .search-field": {
+              width: "200px",
+              opacity: 1,
+            },
+          }}
+        >
+          <SearchIcon sx={{ cursor: "pointer" }} />
+          <TextField
+            className="search-field"
+            variant="outlined"
+            placeholder="Search employees..."
+            value={search}
+            onChange={handleSearchChange}
+            size="small"
+            sx={{
+              ml: 1,
+              width: "0px",
+              opacity: 0,
+              transition: "width 0.3s ease, opacity 0.3s ease",
+            }}
+          />
+        </Box>
         {isAdmin && (
           <Button
             variant="contained"
@@ -91,36 +151,39 @@ export default function EmployeeManagementPage() {
         )}
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="employee table">
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <Typography variant="body1" fontWeight="bold">
-                  Employee
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body1" fontWeight="bold">
-                  Email
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body1" fontWeight="bold">
-                  Role
-                </Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Typography variant="body1" fontWeight="bold">
-                  Actions
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {employees
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((employee) => (
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="employee table">
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <Typography variant="body1" fontWeight="bold">
+                    Employee
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body1" fontWeight="bold">
+                    Email
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body1" fontWeight="bold">
+                    Role
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="body1" fontWeight="bold">
+                    Actions
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(employees ?? []).map((employee) => (
                 <TableRow key={employee.id}>
                   <TableCell component="th" scope="row">
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -136,33 +199,34 @@ export default function EmployeeManagementPage() {
                   <TableCell align="right">
                     <Button
                       size="small"
-                      onClick={() => handleViewEmployee(employee)}
+                      onClick={() => employee.id && handleViewEmployee(employee.id)}
                     >
                       <Chip label="View" color="success" />
                     </Button>
                     {isAdmin && (
                       <Button
-                      size="small"
-                      onClick={() => setDeleteEmployeeId(employee.id)}
+                        size="small"
+                        onClick={() => employee.id && setDeleteEmployeeId(employee.id)}
                       >
-                      <DeleteIcon color="error" />
+                        <DeleteIcon color="error" />
                       </Button>
                     )}
                   </TableCell>
                 </TableRow>
               ))}
-          </TableBody>
-        </Table>
-        <TablePagination
-          rowsPerPageOptions={[7, 14, 21]}
-          component="div"
-          count={employees.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </TableContainer>
+            </TableBody>
+          </Table>
+          <TablePagination
+            rowsPerPageOptions={[7, 14, 21]}
+            component="div"
+            count={totalEmployees}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </TableContainer>
+      )}
 
       <AddEmployeeModal
         isOpen={isAddModalOpen}
@@ -172,7 +236,7 @@ export default function EmployeeManagementPage() {
 
       {viewEmployee && (
         <ViewEmployeeModal
-          employee={viewEmployee}
+          employeeId={viewEmployee}
           isOpen={!!viewEmployee}
           onClose={handleCloseViewModal}
         />
