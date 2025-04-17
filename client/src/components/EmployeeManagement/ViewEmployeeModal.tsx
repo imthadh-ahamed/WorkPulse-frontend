@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Employee } from "@/types/Employee";
 import {
   Button,
@@ -11,11 +12,13 @@ import {
   Typography,
   Divider,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/system";
+import { getEmployeebyId } from "@/app/services/Employee/employee.servics";
 
 interface ViewEmployeeModalProps {
-  employee: Employee;
+  employeeId: string; // Pass only the employee ID
   isOpen: boolean;
   onClose: () => void;
 }
@@ -31,10 +34,58 @@ const InfoRow = styled(Box)({
 });
 
 export function ViewEmployeeModal({
-  employee,
+  employeeId,
   isOpen,
   onClose,
 }: ViewEmployeeModalProps) {
+  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (isOpen && employeeId) {
+      setLoading(true);
+      getEmployeebyId(employeeId)
+        .then((data) => {
+          setEmployee(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching employee details:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [isOpen, employeeId]);
+
+  if (loading) {
+    return (
+      <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
+        <DialogContent
+          sx={{ display: "flex", justifyContent: "center", py: 4 }}
+        >
+          <CircularProgress />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (!employee) {
+    return (
+      <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
+        <DialogContent>
+          <Typography variant="body1" color="error" textAlign="center">
+            Failed to load employee details.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center" }}>
+          <Button onClick={onClose} variant="contained" color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle
@@ -54,8 +105,8 @@ export function ViewEmployeeModal({
               border: "4px solid #fff",
             }}
           >
-            {employee.firstName[0]}
-            {employee.lastName[0]}
+            {employee.firstName?.[0]}
+            {employee.lastName?.[0]}
           </Avatar>
 
           <Typography
@@ -87,28 +138,32 @@ export function ViewEmployeeModal({
               <Typography variant="body2" color="textSecondary">
                 Phone
               </Typography>
-              <Typography variant="body2">{employee.phone}</Typography>
+              <Typography variant="body2">{employee.phone || "N/A"}</Typography>
             </InfoRow>
 
             <InfoRow>
               <Typography variant="body2" color="textSecondary">
                 Address
               </Typography>
-              <Typography variant="body2">{employee.address}</Typography>
+              <Typography variant="body2">
+                {employee.address || "N/A"}
+              </Typography>
             </InfoRow>
 
             <InfoRow>
               <Typography variant="body2" color="textSecondary">
                 Bio
               </Typography>
-              <Typography variant="body2">{employee.bio}</Typography>
+              <Typography variant="body2">{employee.bio || "N/A"}</Typography>
             </InfoRow>
 
             <InfoRow>
               <Typography variant="body2" color="textSecondary">
                 Position
               </Typography>
-              <Typography variant="body2">{employee.position}</Typography>
+              <Typography variant="body2">
+                {employee.position || "N/A"}
+              </Typography>
             </InfoRow>
           </div>
         </div>
