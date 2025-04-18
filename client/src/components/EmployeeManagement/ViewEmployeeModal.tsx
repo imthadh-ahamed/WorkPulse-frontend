@@ -15,7 +15,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import { getEmployeebyId } from "@/app/services/Employee/employee.servics";
+import { getEmployeebyId } from "@/app/services/Employee/employee.service";
 
 interface ViewEmployeeModalProps {
   readonly employeeId: string;
@@ -145,9 +145,7 @@ export function ViewEmployeeModal({
               <Typography variant="body2" color="textSecondary">
                 Address
               </Typography>
-              <Typography variant="body2">
-                {employee.address || "-"}
-              </Typography>
+              <Typography variant="body2">{employee.address || "-"}</Typography>
             </InfoRow>
 
             <InfoRow>

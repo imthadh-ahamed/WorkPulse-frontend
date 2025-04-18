@@ -1,10 +1,10 @@
 export interface Announcement {
-  id: number;
+  id?: number;
   title: string;
   description: string;
-  tenantId: number;
-  created: string;
+  tenantId: string;
+  created: Date;
   createdBy: string;
-  modified?: string | null;
+  modified?: Date | null;
   modifiedBy?: string | null;
 }
