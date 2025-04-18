@@ -21,7 +21,8 @@ import { RootState } from "@/app/redux/store";
 import { useState } from "react";
 import { Employee } from "@/types/Employee";
 import { createAnnouncement } from "@/app/services/Announcement/announcement.service";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface AddAnnouncementModalProps {
   isOpen: boolean;
@@ -182,6 +183,7 @@ export function AddAnnouncementModal({
           )}
         </Formik>
       </DialogContent>
+      <ToastContainer />
     </Dialog>
   );
 }

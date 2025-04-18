@@ -38,3 +38,21 @@ export const getAnnouncements = async (
     throw error;
   }
 };
+
+export const updateAnnouncement = async (
+  id: string,
+  data: {
+    title: string;
+    description: string;
+  }
+): Promise<Announcement> => {
+  try {
+    const endpoint = `/announcement/${id}`;
+    const response = await axiosInstance.put(endpoint, data);
+    console.log("Announcement updated successfully", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating announcement:", error);
+    throw error;
+  }
+};
