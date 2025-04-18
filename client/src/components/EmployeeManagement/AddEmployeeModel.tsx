@@ -25,6 +25,8 @@ import { toast, ToastContainer } from "react-toastify";
 import { inviteEmployee } from "@/app/services/auth.service";
 import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 interface AddEmployeeModalProps {
   readonly isOpen: boolean;
@@ -49,15 +51,15 @@ export function AddEmployeeModal({
   onSave,
 }: AddEmployeeModalProps) {
   const [loading, setLoading] = useState(false);
+  const user = useSelector(
+    (state: RootState) => state.user.userData
+  ) as Employee | null;
 
-  const handleSave = async (values: {
-    email: string;
-    role: string;
-  }) => {
+  const handleSave = async (values: { email: string; role: string }) => {
     setLoading(true);
     try {
       const employee = {
-        tenantId: localStorage.getItem("tenantId") || "",
+        tenantId: user?.tenantId || "",
         isAdmin: values.role === "Admin",
         email: values.email,
         role: values.role,

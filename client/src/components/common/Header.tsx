@@ -11,23 +11,18 @@ import { useState } from "react";
 import { ProfileMenu } from "@/components/common/ProfileMenu";
 import { NotificationMenu } from "@/components/common/NotificationMenu";
 import { Employee } from "@/types/Employee";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 interface HeaderProps {
-  onSidebarToggle: () => void;
+  readonly onSidebarToggle: () => void;
 }
-
-const employee: Employee = {
-  id: 1,
-  firstName: "John",
-  lastName: "Doe",
-  email: "john.doe@example.com",
-  role: "Admin",
-};
 
 export function Header({ onSidebarToggle }: HeaderProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
+  const user = useSelector((state: RootState) => state.user.userData) as Employee | null;
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -92,8 +87,8 @@ export function Header({ onSidebarToggle }: HeaderProps) {
             <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
               <IconButton onClick={handleMenuOpen}>
                 <Avatar>
-                  {employee.firstName[0]}
-                  {employee.lastName[0]}
+                  {user?.firstName?.[0]}
+                  {user?.lastName?.[0]}
                 </Avatar>
               </IconButton>
             </Box>
@@ -105,7 +100,7 @@ export function Header({ onSidebarToggle }: HeaderProps) {
         anchorEl={anchorEl}
         isOpen={Boolean(anchorEl)}
         onClose={handleMenuClose}
-        employee={employee}
+        employee={user || undefined}
       />
 
       <NotificationMenu

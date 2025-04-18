@@ -12,9 +12,9 @@ import { RootState } from "../redux/store";
 
 export default function MainLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.userData);
@@ -23,10 +23,8 @@ export default function MainLayout({
     if (!user) {
       getCurrentUser((res) => {
         if (res?.status === 200 && res.data) {
-          const tenantId = res.data.tenantId;
           dispatch(userData(res.data));
           dispatch(isAdmin(res.data.isAdmin));
-          localStorage.setItem("tenantId", tenantId);
         } else if (res?.status == 401) {
           // logout
           localStorage.removeItem("token");

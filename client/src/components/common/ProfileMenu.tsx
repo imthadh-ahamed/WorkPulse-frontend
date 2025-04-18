@@ -13,10 +13,10 @@ import { User } from "lucide-react";
 import Cookies from "js-cookie";
 
 interface ProfileMenuProps {
-  anchorEl: null | HTMLElement;
-  isOpen: boolean;
-  onClose: () => void;
-  employee: Employee;
+  readonly anchorEl: null | HTMLElement;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly employee?: Employee;
 }
 
 export function ProfileMenu({
@@ -30,25 +30,27 @@ export function ProfileMenu({
       anchorEl={anchorEl}
       open={isOpen}
       onClose={onClose}
-      PaperProps={{
-        elevation: 3,
-        sx: {
-          overflow: "visible",
-          mt: 1.5,
-          minWidth: 200,
-          borderRadius: 1,
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
-          "&:before": {
-            content: '""',
-            display: "block",
-            position: "absolute",
-            top: 0,
-            right: 14,
-            width: 10,
-            height: 10,
-            bgcolor: "background.paper",
-            transform: "translateY(-50%) rotate(45deg)",
-            zIndex: 0,
+      slotProps={{
+        paper: {
+          elevation: 3,
+          sx: {
+            overflow: "visible",
+            mt: 1.5,
+            minWidth: 200,
+            borderRadius: 1,
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
+            "&:before": {
+              content: '""',
+              display: "block",
+              position: "absolute",
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: "background.paper",
+              transform: "translateY(-50%) rotate(45deg)",
+              zIndex: 0,
+            },
           },
         },
       }}
@@ -65,7 +67,7 @@ export function ProfileMenu({
         }}
       >
         <Typography variant="body1" fontWeight="bold">
-          {employee.firstName} {employee.lastName}
+          {employee?.firstName} {employee?.lastName}
         </Typography>
       </MenuItem>
       <Divider />

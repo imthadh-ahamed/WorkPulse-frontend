@@ -46,8 +46,10 @@ export default function EmployeeManagementPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [totalEmployees, setTotalEmployees] = useState<number>(0);
   const isAdmin = useSelector((state: RootState) => state.user.isAdmin);
-  const tenantId =
-    typeof window !== "undefined" ? localStorage.getItem("tenantId") ?? "" : "";
+  const user = useSelector(
+    (state: RootState) => state.user.userData
+  ) as Employee | null;
+  const tenantId = user?.tenantId ?? null; 
 
   // Fetch employees dynamically
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function EmployeeManagementPage() {
       setLoading(true);
       try {
         const { employees, total } = await getAllEmployees(
-          tenantId,
+          tenantId ?? "",
           page + 1,
           rowsPerPage,
           search
