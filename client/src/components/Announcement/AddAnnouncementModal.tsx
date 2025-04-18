@@ -10,11 +10,18 @@ import {
   Grid,
   Box,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { Announcement } from "@/types/Announcement";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Close as CloseIcon } from "@mui/icons-material";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
+import { useState } from "react";
+import { Employee } from "@/types/Employee";
+import { createAnnouncement } from "@/app/services/Announcement/announcement.service";
+import { toast } from "react-toastify";
 
 interface AddAnnouncementModalProps {
   isOpen: boolean;
@@ -35,19 +42,35 @@ export function AddAnnouncementModal({
   isOpen,
   onClose,
   onSave,
-}: AddAnnouncementModalProps) {
-  const handleSave = (values: { title: string; description: string }) => {
-    const announcement = {
-      ...values,
-      tenantId: 101, // Replace with actual tenantId
-      created: new Date().toISOString(),
-      createdBy: "defaultUserId", // Replace with actual userId
-    };
-    onSave(announcement); // Pass the form values to onSave callback
+}: Readonly<AddAnnouncementModalProps>) {
+  const [loading, setLoading] = useState(false);
+  const user = useSelector(
+      (state: RootState) => state.user.userData
+    ) as Employee | null;
+  const handleSave = async (values: { title: string; description: string }) => {
+    setLoading(true);
+    try {
+      const announcement = {
+        tenantId: user?.tenantId ?? "",
+        title: values.title,
+        description: values.description,
+        created: new Date(),
+        createdBy: user?.id ?? "",
+      };
+      await createAnnouncement(announcement);
+      toast.success("Announcement created successfully!");
+      onSave(announcement);
+      onClose();
+    } catch (error) {
+      console.error("Error creating announcement:", error);
+      toast.error("Failed to create announcement. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
-    onClose(); // Close the modal
+    onClose();
   };
 
   return (
@@ -149,8 +172,10 @@ export function AddAnnouncementModal({
                     fontWeight: "bold",
                     padding: "8px 16px",
                   }}
+                  disabled={loading}
+                  startIcon={loading && <CircularProgress size={20} />}
                 >
-                  Save
+                  {loading ? "Saving..." : "Save"}
                 </Button>
               </DialogActions>
             </Form>

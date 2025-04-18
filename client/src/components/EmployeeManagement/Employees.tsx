@@ -30,7 +30,10 @@ import { ViewEmployeeModal } from "@/components/EmployeeManagement/ViewEmployeeM
 import { DeleteConfirmationModal } from "@/components/EmployeeManagement/DeleteConfirmationModal";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
-import { deleteEmployeeById, getAllEmployees } from "@/app/services/Employee/employee.servics";
+import {
+  deleteEmployeeById,
+  getAllEmployees,
+} from "@/app/services/Employee/employee.service";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -49,7 +52,7 @@ export default function EmployeeManagementPage() {
   const user = useSelector(
     (state: RootState) => state.user.userData
   ) as Employee | null;
-  const tenantId = user?.tenantId ?? null; 
+  const tenantId = user?.tenantId ?? null;
 
   // Fetch employees dynamically
   useEffect(() => {
@@ -274,7 +277,7 @@ export default function EmployeeManagementPage() {
           loading={deleteLoading}
         />
       )}
-    <ToastContainer />
+      <ToastContainer />
     </Container>
   );
 }

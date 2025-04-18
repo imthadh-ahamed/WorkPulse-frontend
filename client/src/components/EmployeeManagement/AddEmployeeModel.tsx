@@ -59,7 +59,7 @@ export function AddEmployeeModal({
     setLoading(true);
     try {
       const employee = {
-        tenantId: user?.tenantId || "",
+        tenantId: user?.tenantId ?? "",
         isAdmin: values.role === "Admin",
         email: values.email,
         role: values.role,
@@ -78,7 +78,7 @@ export function AddEmployeeModal({
   };
 
   const handleClose = () => {
-    onClose(); // Close the modal
+    onClose();
   };
 
   return (
