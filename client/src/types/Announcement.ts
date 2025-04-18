@@ -1,5 +1,6 @@
 export interface Announcement {
-  id?: number;
+  _id?: string;
+  id?: string;
   title: string;
   description: string;
   tenantId: string;

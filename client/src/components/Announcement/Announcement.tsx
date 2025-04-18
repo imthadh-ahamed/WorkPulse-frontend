@@ -23,6 +23,8 @@ import { AddAnnouncementModal } from "@/components/Announcement/AddAnnouncementM
 import { EditAnnouncementModal } from "@/components/Announcement/EditAnnouncementModal";
 import { DeleteAnnouncementModal } from "@/components/Announcement/DeleteAnnouncementModal";
 import { getAnnouncements } from "@/app/services/Announcement/announcement.service";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
 
 export function Announcements() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,6 +36,7 @@ export function Announcements() {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedAnnouncement, setSelectedAnnouncement] =
     useState<Announcement | null>(null);
+  const isAdmin = useSelector((state: RootState) => state.user.isAdmin);
   const announcementsPerPage = 3;
 
   // Fetch announcements from the backend
@@ -41,7 +44,11 @@ export function Announcements() {
     setLoading(true);
     try {
       const response = await getAnnouncements(page, announcementsPerPage);
-      setAnnouncementList(response.data);
+      const announcementsWithId = response.data.map((announcement: Announcement) => ({
+        ...announcement,
+        id: announcement._id,
+      }));
+      setAnnouncementList(announcementsWithId);
       setTotalPages(response.totalPages);
     } catch (error) {
       console.error("Error fetching announcements:", error);
@@ -54,10 +61,7 @@ export function Announcements() {
     fetchAnnouncements(currentPage);
   }, [currentPage]);
 
-  const handleChangePage = (
-    _: React.ChangeEvent<unknown>,
-    value: number
-  ) => {
+  const handleChangePage = (_: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
   };
 
@@ -67,7 +71,7 @@ export function Announcements() {
 
   const handleEditAnnouncement = (updatedAnnouncement: Announcement) => {
     const updatedList = announcementList.map((announcement) =>
-      announcement.id === updatedAnnouncement.id
+      announcement._id === updatedAnnouncement._id
         ? updatedAnnouncement
         : announcement
     );
@@ -78,7 +82,7 @@ export function Announcements() {
   const handleDeleteAnnouncement = () => {
     if (selectedAnnouncement) {
       const updatedList = announcementList.filter(
-        (announcement) => announcement.id !== selectedAnnouncement.id
+        (announcement) => announcement._id !== selectedAnnouncement._id
       );
       setAnnouncementList(updatedList);
       setIsDeleteModalOpen(false);
@@ -109,13 +113,15 @@ export function Announcements() {
         <Typography variant="h4" component="h1" fontWeight="bold">
           Announcements
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setIsAddModalOpen(true)}
-        >
-          New Announcement
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setIsAddModalOpen(true)}
+          >
+            New Announcement
+          </Button>
+        )}
       </Box>
 
       {loading ? (
@@ -125,7 +131,11 @@ export function Announcements() {
       ) : (
         <Grid container spacing={3}>
           {announcementList.map((announcement) => (
-            <Grid item xs={12} key={`announcement-${announcement.id || Math.random()}`}>
+            <Grid
+              item
+              xs={12}
+              key={`announcement-${announcement._id || Math.random()}`}
+            >
               <Card>
                 <CardContent>
                   <Box
@@ -138,22 +148,24 @@ export function Announcements() {
                     <Typography variant="h6" gutterBottom fontWeight="bold">
                       {announcement.title}
                     </Typography>
-                    <Box>
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleOpenEditModal(announcement)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        sx={{ color: "red" }}
-                        onClick={() => handleOpenDeleteModal(announcement)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
+                    {isAdmin && (
+                      <Box>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleOpenEditModal(announcement)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          sx={{ color: "red" }}
+                          onClick={() => handleOpenDeleteModal(announcement)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    )}
                   </Box>
-                  <Typography variant="body1" paragraph>
+                  <Typography variant="body1">
                     {announcement.description}
                   </Typography>
                 </CardContent>
