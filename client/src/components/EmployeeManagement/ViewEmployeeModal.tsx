@@ -18,9 +18,9 @@ import { styled } from "@mui/system";
 import { getEmployeebyId } from "@/app/services/Employee/employee.servics";
 
 interface ViewEmployeeModalProps {
-  employeeId: string; // Pass only the employee ID
-  isOpen: boolean;
-  onClose: () => void;
+  readonly employeeId: string;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
 }
 
 const InfoRow = styled(Box)({
