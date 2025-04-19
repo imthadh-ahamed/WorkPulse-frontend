@@ -2,6 +2,7 @@
 
 import {
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -13,12 +14,14 @@ interface DeleteAnnouncementModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onConfirm: () => void;
+  readonly loading?: boolean;
 }
 
 export function DeleteAnnouncementModal({
   isOpen,
   onClose,
   onConfirm,
+  loading,
 }: DeleteAnnouncementModalProps) {
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -40,8 +43,10 @@ export function DeleteAnnouncementModal({
           }}
           variant="contained"
           color="error"
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={20} /> : undefined}
         >
-          Delete
+          {loading ? "Deleting..." : "Delete"}
         </Button>
       </DialogActions>
     </Dialog>
