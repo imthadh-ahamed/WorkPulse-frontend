@@ -1,5 +1,5 @@
 import DailySummary from "@/components/DailySummary/DailySummary";
-import { TaskData } from "@/components/TaskManagement/lib/types";
+import { TaskData } from "@/types/types";
 
 const tasks: TaskData[] = [
   {

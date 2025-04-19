@@ -5,7 +5,7 @@ import { Box, Typography, Container } from "@mui/material";
 import { projects } from "@/app/data/Projects";
 import { useState, useEffect } from "react";
 import { initialTasks } from "@/components/TaskManagement/lib/data";
-import type { TaskData } from "@/components/TaskManagement/lib/types";
+import type { TaskData } from "@/types/types";
 import Button from "@mui/material/Button";
 import { PlusCircle } from "lucide-react";
 import {

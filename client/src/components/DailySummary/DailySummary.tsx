@@ -1,23 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/TaskManagement/ui/card";
-import { Button } from "@/components/TaskManagement/ui/button";
-import { Input } from "@/components/TaskManagement/ui/input";
-import { Label } from "@/components/TaskManagement/ui/label";
-import { Separator } from "@/components/TaskManagement/ui/separator";
+import {
+  Card,
+  CardContent,
+  Button,
+  TextField as Input,
+  InputLabel as Label,
+  Divider as Separator,
+  Box,
+  Container,
+  Typography,
+  Grid,
+  Switch,
+} from "@mui/material";
 import { Clock, Mail, Send } from "lucide-react";
-import type { TaskData } from "@/components/TaskManagement/lib/types";
+import type { TaskData } from "@/types/types";
 import { formatDate } from "@/components/TaskManagement/lib/utils";
-import { Box, Container, Typography, Grid, Switch } from "@mui/material";
 
 interface DailySummary {
   readonly tasks: TaskData[];
 }
 
-export default function DailySummary({
-  tasks,
-}: DailySummary) {
+export default function DailySummary({ tasks }: DailySummary) {
   const [emailTime, setEmailTime] = useState("18:00");
   const [emailRecipients, setEmailRecipients] = useState("admin@example.com");
   const [includeCompleted, setIncludeCompleted] = useState(true);
@@ -136,7 +141,7 @@ export default function DailySummary({
                       }}
                     >
                       Completed Tasks
-                      <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block ml-2"></span>
+                      <span style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: "#10b981", display: "inline-block", marginLeft: "8px" }}></span>
                     </Label>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
@@ -160,7 +165,7 @@ export default function DailySummary({
                       }}
                     >
                       In Progress Tasks
-                      <span className="w-3 h-3 rounded-full bg-amber-500 inline-block ml-2"></span>
+                      <span style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: "#f59e0b", display: "inline-block", marginLeft: "8px" }}></span>
                     </Label>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
@@ -184,14 +189,14 @@ export default function DailySummary({
                       }}
                     >
                       Pending Tasks
-                      <span className="w-3 h-3 rounded-full bg-gray-500 inline-block ml-2"></span>
+                      <span style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: "#6b7280", display: "inline-block", marginLeft: "8px" }}></span>
                     </Label>
                   </Box>
                 </Box>
               </Box>
 
               <Button
-                variant="default"
+                variant="contained"
                 color="primary"
                 style={{
                   marginTop: "16px",
@@ -278,28 +283,28 @@ export default function DailySummary({
                   <Typography variant="body2" color="textSecondary">
                     Task Completion: {completionPercentage}%
                   </Typography>
-                    <Box
+                  <Box
                     sx={{
                       width: "100%",
                       backgroundColor: "#e0e0e0",
                       borderRadius: "4px",
                       mt: 1,
                     }}
-                    >
+                  >
                     <Box
                       sx={{
-                      width: `${completionPercentage}%`,
-                      backgroundColor:
-                        completionPercentage === 100
-                        ? "#10b981" // Green for 100% completion
-                        : completionPercentage >= 50
-                        ? "#f59e0b" // Amber for 50-99% completion
-                        : "#ef4444", // Red for less than 50% completion
-                      height: "8px",
-                      borderRadius: "4px",
+                        width: `${completionPercentage}%`,
+                        backgroundColor:
+                          completionPercentage === 100
+                            ? "#10b981" // Green for 100% completion
+                            : completionPercentage >= 50
+                            ? "#f59e0b" // Amber for 50-99% completion
+                            : "#ef4444", // Red for less than 50% completion
+                        height: "8px",
+                        borderRadius: "4px",
                       }}
                     ></Box>
-                    </Box>
+                  </Box>
                 </Box>
 
                 <Separator style={{ margin: "16px 0" }} />
