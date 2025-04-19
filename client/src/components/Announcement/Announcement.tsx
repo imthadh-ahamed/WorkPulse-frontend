@@ -178,7 +178,7 @@ export function Announcements() {
                     {announcement.description}
                   </Typography>
                 </CardContent>
-                <ToastContainer/>
+                <ToastContainer />
               </Card>
             </Grid>
           ))}
@@ -219,7 +219,11 @@ export function Announcements() {
         <DeleteAnnouncementModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={() => selectedAnnouncement?.id && handleDeleteAnnouncement(selectedAnnouncement.id)}
+          onConfirm={() =>
+            selectedAnnouncement?.id &&
+            handleDeleteAnnouncement(selectedAnnouncement.id)
+          }
+          loading={loading}
         />
       )}
     </Container>
