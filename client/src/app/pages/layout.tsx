@@ -35,7 +35,7 @@ export default function MainLayout({
             "An unexpected error occurred:",
             res?.data || "Unknown error"
           );
-          // window.location.href = "/error";
+          window.location.href = "/error";
 
         }
       });
