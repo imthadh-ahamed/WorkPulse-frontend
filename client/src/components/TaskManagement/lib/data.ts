@@ -1,6 +1,12 @@
-import type { TaskData } from "./types"
+import type { TaskData } from "../../../types/types";
 
-export const employees = ["John Smith", "Sarah Johnson", "Michael Brown", "Emily Davis", "David Wilson"]
+export const employees = [
+  "John Smith",
+  "Sarah Johnson",
+  "Michael Brown",
+  "Emily Davis",
+  "David Wilson",
+];
 
 export const initialTasks: TaskData[] = [
   {
@@ -36,7 +42,8 @@ export const initialTasks: TaskData[] = [
   {
     id: "task-4",
     title: "Update employee handbook",
-    description: "Update company policies and procedures in the employee handbook",
+    description:
+      "Update company policies and procedures in the employee handbook",
     assignedTo: "David Wilson",
     priority: "low",
     status: "in-progress",
@@ -53,5 +60,4 @@ export const initialTasks: TaskData[] = [
     deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
   },
-]
-
+];
