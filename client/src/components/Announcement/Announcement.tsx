@@ -82,6 +82,7 @@ export function Announcements() {
   };
 
   const handleDeleteAnnouncement = async(id: string) => {
+    setLoading(true);
     try {
       await deleteAnnouncement(id);
       toast.success("Announcement deleted successfully!");
@@ -96,6 +97,8 @@ export function Announcements() {
     } catch (error) {
       console.error("Error deleting announcement:", error);
       toast.error("Failed to delete announcement. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,6 +114,7 @@ export function Announcements() {
 
   return (
     <Container maxWidth="xl">
+      <ToastContainer />
       <Box
         sx={{
           display: "flex",
@@ -178,7 +182,6 @@ export function Announcements() {
                     {announcement.description}
                   </Typography>
                 </CardContent>
-                <ToastContainer />
               </Card>
             </Grid>
           ))}
