@@ -11,16 +11,24 @@ import {
   Box,
   IconButton,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { Event } from "@/types/Calender";
+import { EventDTO } from "@/app/DTOs/EventDTO";
+import { useSelector } from "react-redux";
+import { Employee } from "@/types/Employee";
+import { useState } from "react";
+import { RootState } from "@/app/redux/store";
+import { createEvent } from "@/app/services/Calendar/calendar.service";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface AddEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (event: Omit<Event, "id">) => void;
+  onSave: (event: Omit<EventDTO, "id">) => void;
 }
 
 const validationSchema = Yup.object({
@@ -50,28 +58,36 @@ const validationSchema = Yup.object({
   }),
 });
 
-export function AddEventModal({ isOpen, onClose, onSave }: AddEventModalProps) {
-  const handleSave = (values: {
-    title: string;
-    start: string;
-    end: string;
-    location?: string;
-    description?: string;
-    type: "meeting" | "event" | "deadline";
-    repeat: "once" | "daily" | "weekly" | "monthly" | "yearly";
-    repeatEndDate?: string;
-  }) => {
-    const event = {
-      ...values,
-      start: new Date(values.start),
-      end: new Date(values.end),
-      repeatEndDate: values.repeatEndDate
-        ? new Date(values.repeatEndDate)
-        : undefined,
-      description: values.description || "",
-      tenantId: 1,
-    };
-    onSave(event);
+export function AddEventModal({ isOpen, onClose, onSave }: Readonly<AddEventModalProps>) {
+  const [loading, setLoading] = useState(false);
+  const user = useSelector(
+        (state: RootState) => state.user.userData
+      ) as Employee | null;
+
+  const handleSave = async (values: EventDTO) => {
+    setLoading(true);
+    try {
+      const event = {
+        tenantId: user?.tenantId ?? "",
+        title: values.title,
+        start: new Date(values.start),
+        end: new Date(values.end),
+        location: values.location,
+        description: values.description,
+        type: values.type,
+        repeat: values.repeat,
+        repeatEndDate: values.repeatEndDate ? new Date(values.repeatEndDate) : undefined,
+      };
+      await createEvent(event);
+      toast.success("Event created successfully!");
+      onSave(event);
+      onClose();
+    } catch (error) {
+      console.error("Error creating event:", error);
+    } finally {
+      setLoading(false);
+    }
+
   };
 
   const handleClose = () => {
@@ -95,14 +111,15 @@ export function AddEventModal({ isOpen, onClose, onSave }: AddEventModalProps) {
       <DialogContent>
         <Formik
           initialValues={{
+            tenantId: user?.tenantId ?? "",
             title: "",
-            start: "",
-            end: "",
+            start: new Date(),
+            end: new Date(),
             location: "",
             description: "",
-            type: "event",
+            type: "meeting",
             repeat: "once",
-            repeatEndDate: "",
+            repeatEndDate: new Date(),
           }}
           validationSchema={validationSchema}
           onSubmit={handleSave}
@@ -142,7 +159,7 @@ export function AddEventModal({ isOpen, onClose, onSave }: AddEventModalProps) {
                       label="Start Date & Time"
                       type="datetime-local"
                       fullWidth
-                      value={values.start}
+                      value={values.start || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       error={touched.start && Boolean(errors.start)}
@@ -167,7 +184,7 @@ export function AddEventModal({ isOpen, onClose, onSave }: AddEventModalProps) {
                       label="End Date & Time"
                       type="datetime-local"
                       fullWidth
-                      value={values.end}
+                      value={values.end || ""}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       error={touched.end && Boolean(errors.end)}
@@ -296,7 +313,7 @@ export function AddEventModal({ isOpen, onClose, onSave }: AddEventModalProps) {
                             label="Repeat End Date"
                             type="date"
                             fullWidth
-                            value={values.repeatEndDate}
+                            value={values.repeatEndDate || ""}
                             onChange={handleChange}
                             onBlur={handleBlur}
                             error={
@@ -343,14 +360,18 @@ export function AddEventModal({ isOpen, onClose, onSave }: AddEventModalProps) {
                     fontWeight: "bold",
                     padding: "8px 16px",
                   }}
+                  disabled={loading}
+                  startIcon={loading && <CircularProgress size={20} />}
                 >
-                  Save
+                  {loading ? "Saving..." : "Save"}
                 </Button>
               </DialogActions>
             </Form>
           )}
         </Formik>
       </DialogContent>
+      <ToastContainer />
     </Dialog>
   );
 }
+
