@@ -22,9 +22,11 @@ import { Announcement } from "@/types/Announcement";
 import { AddAnnouncementModal } from "@/components/Announcement/AddAnnouncementModal";
 import { EditAnnouncementModal } from "@/components/Announcement/EditAnnouncementModal";
 import { DeleteAnnouncementModal } from "@/components/Announcement/DeleteAnnouncementModal";
-import { getAnnouncements } from "@/app/services/Announcement/announcement.service";
+import { deleteAnnouncement, getAnnouncements } from "@/app/services/Announcement/announcement.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/store";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export function Announcements() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -79,14 +81,21 @@ export function Announcements() {
     setIsEditModalOpen(false);
   };
 
-  const handleDeleteAnnouncement = () => {
-    if (selectedAnnouncement) {
-      const updatedList = announcementList.filter(
-        (announcement) => announcement._id !== selectedAnnouncement._id
+  const handleDeleteAnnouncement = async(id: string) => {
+    try {
+      await deleteAnnouncement(id);
+      toast.success("Announcement deleted successfully!");
+      setAnnouncementList((prevList) =>
+        prevList.filter(
+          (announcement) => announcement.id !== id
+        )
       );
-      setAnnouncementList(updatedList);
       setIsDeleteModalOpen(false);
       setSelectedAnnouncement(null);
+      setTotalPages((prev) => prev - 1);
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+      toast.error("Failed to delete announcement. Please try again.");
     }
   };
 
@@ -169,6 +178,7 @@ export function Announcements() {
                     {announcement.description}
                   </Typography>
                 </CardContent>
+                <ToastContainer/>
               </Card>
             </Grid>
           ))}
@@ -209,7 +219,7 @@ export function Announcements() {
         <DeleteAnnouncementModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDeleteAnnouncement}
+          onConfirm={() => selectedAnnouncement?.id && handleDeleteAnnouncement(selectedAnnouncement.id)}
         />
       )}
     </Container>

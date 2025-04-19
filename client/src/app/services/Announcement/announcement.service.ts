@@ -56,3 +56,15 @@ export const updateAnnouncement = async (
     throw error;
   }
 };
+
+export const deleteAnnouncement = async (id: string ): Promise<void> => {
+  try {
+    const endpoint = `/announcement/${id}`;
+    const response = await axiosInstance.delete(endpoint);
+    console.log("Announcement deleted successfully", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting announcement:", error);
+    throw error;
+  }
+}
