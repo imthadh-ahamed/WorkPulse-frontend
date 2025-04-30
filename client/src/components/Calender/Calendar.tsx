@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -18,6 +18,7 @@ import {
   TextField,
   Menu,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -27,12 +28,16 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
 } from "@mui/icons-material";
-import { events as initialEvents } from "@/app/data/Calender";
 import { AddEventModal } from "@/components/Calender/AddEventModal";
 import { EditEventModal } from "@/components/Calender/EditEventModal";
 import { DeleteEventModal } from "@/components/Calender/DeleteEventModal";
 import { Event } from "@/types/Calender";
 import { MoreVerticalIcon } from "lucide-react";
+import { getEvents } from "@/app/services/Calendar/calendar.service";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
+import { Employee } from "@/types/Employee";
 
 const generateCalendarDays = (currentDate: Date, eventsList: Event[]) => {
   const days = [];
@@ -69,17 +74,19 @@ const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [eventsList, setEventsList] = useState(initialEvents); // Manage events state
   const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
   const [isEditEventModalOpen, setIsEditEventModalOpen] = useState(false);
   const [isDeleteEventModalOpen, setIsDeleteEventModalOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<Event | null>(null);
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
-  const [currentPage, setCurrentPage] = useState(1); // Pagination state
-  const [searchQuery, setSearchQuery] = useState(""); // Search query state
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // Menu anchor state
-  const [selectedEventId, setSelectedEventId] = useState<number | null>(null); // Selected event ID for menu
-  const eventsPerPage = 7; // Number of events per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [eventsList, setEventsList] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const eventsPerPage = 7;
 
   const calendarDays = generateCalendarDays(currentDate, eventsList);
 
@@ -134,13 +141,14 @@ export default function CalendarPage() {
 
   // Pagination and search logic for upcoming events
   const upcomingEvents = eventsList
-    .toSorted((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+    .toSorted(
+      (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+    )
     .filter((event) => new Date(event.start) >= new Date())
     .filter((event) =>
       event.title.toLowerCase().includes(searchQuery.toLowerCase())
-    ); // Filter by search query
+    );
 
-  const totalPages = Math.ceil(upcomingEvents.length / eventsPerPage);
   const paginatedEvents = upcomingEvents.slice(
     (currentPage - 1) * eventsPerPage,
     currentPage * eventsPerPage
@@ -169,6 +177,41 @@ export default function CalendarPage() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedEventId(null); // Clear the selected event ID
+  };
+
+  const user = useSelector(
+    (state: RootState) => state.user.userData
+  ) as Employee | null;
+
+  const fetchAllEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const tenantId = user?.tenantId ?? "";
+      const response = await getEvents(
+        tenantId,
+        currentPage,
+        eventsPerPage,
+        searchQuery
+      );
+      console.log(response, "eventresponse");
+      setEventsList(response.events);
+      setTotalPages(Math.ceil(response.total / eventsPerPage));
+      toast.success("Events fetched successfully!");
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      toast.error("Failed to fetch events. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.tenantId, currentPage, eventsPerPage, searchQuery]);
+
+  useEffect(() => {
+    fetchAllEvents();
+  }, [fetchAllEvents]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
   };
 
   return (
@@ -371,7 +414,7 @@ export default function CalendarPage() {
                 variant="outlined"
                 placeholder="Search events..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 InputProps={{
                   style: { borderRadius: "8px" },
                 }}
@@ -387,127 +430,136 @@ export default function CalendarPage() {
             </Box>
           </Box>
           <Paper>
-            <List>
-              {paginatedEvents.map((event) => (
-                <Box key={event.id}>
-                  <ListItem
-                    secondaryAction={
-                      <Box>
-                        <Button
-                          size="small"
-                          onClick={(e) => handleMenuOpen(e, event.id)}
-                        >
-                          <MoreVerticalIcon />
-                        </Button>
-                        <Menu
-                          id={`menu-${event.id}`}
-                          anchorEl={anchorEl}
-                          open={
-                            Boolean(anchorEl) && selectedEventId === event.id
-                          }
-                          onClose={handleMenuClose}
-                          PaperProps={{
-                            elevation: 3,
-                            sx: {
-                              borderRadius: 2,
-                              minWidth: 150,
-                              backgroundColor: "background.paper",
-                              boxShadow:
-                                "0px 2px 4px rgba(0, 0, 0, 0.1), 0px 4px 8px rgba(0, 0, 0, 0.1)",
-                            },
-                          }}
-                        >
-                          <MenuItem
-                            onClick={() => {
-                              handleMenuClose();
-                              handleEditClick(event); // Open EditEventModal
-                            }}
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              "&:hover": {
-                                backgroundColor: "action.hover",
+            {loading ? (
+              <Box sx={{ p: 2, textAlign: "center" }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <List>
+                {paginatedEvents.map((event) => (
+                  <Box key={event.id}>
+                    <ListItem
+                      secondaryAction={
+                        <Box>
+                          <Button
+                            size="small"
+                            onClick={(e) => handleMenuOpen(e, event.id)}
+                          >
+                            <MoreVerticalIcon />
+                          </Button>
+                          <Menu
+                            id={`menu-${event.id}`}
+                            anchorEl={anchorEl}
+                            open={
+                              Boolean(anchorEl) && selectedEventId === event.id
+                            }
+                            onClose={handleMenuClose}
+                            PaperProps={{
+                              elevation: 3,
+                              sx: {
+                                borderRadius: 2,
+                                minWidth: 150,
+                                backgroundColor: "background.paper",
+                                boxShadow:
+                                  "0px 2px 4px rgba(0, 0, 0, 0.1), 0px 4px 8px rgba(0, 0, 0, 0.1)",
                               },
                             }}
                           >
-                            <EditIcon fontSize="small" sx={{ color: "blue" }} />
-                            <Typography
-                              variant="body2"
-                              color="text.primary"
+                            <MenuItem
+                              onClick={() => {
+                                handleMenuClose();
+                                handleEditClick(event); // Open EditEventModal
+                              }}
                               sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: 0.5,
+                                gap: 1,
+                                "&:hover": {
+                                  backgroundColor: "action.hover",
+                                },
                               }}
                             >
-                              Edit
-                            </Typography>
-                          </MenuItem>
-                          <MenuItem
-                            onClick={() => {
-                              handleMenuClose();
-                              handleDeleteClick(event); // Open DeleteEventModal
-                            }}
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              "&:hover": {
-                                backgroundColor: "action.hover",
-                              },
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" color="error" />
-                            <Typography
-                              variant="body2"
-                              color="text.primary"
+                              <EditIcon
+                                fontSize="small"
+                                sx={{ color: "blue" }}
+                              />
+                              <Typography
+                                variant="body2"
+                                color="text.primary"
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                }}
+                              >
+                                Edit
+                              </Typography>
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => {
+                                handleMenuClose();
+                                handleDeleteClick(event); // Open DeleteEventModal
+                              }}
                               sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: 0.5,
+                                gap: 1,
+                                "&:hover": {
+                                  backgroundColor: "action.hover",
+                                },
                               }}
                             >
-                              Delete
-                            </Typography>
-                          </MenuItem>
-                        </Menu>
-                      </Box>
-                    }
-                  >
-                    <ListItemText
-                      primary={event.title}
-                      secondary={
-                        <>
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            color="text.primary"
-                          >
-                            {new Date(event.start).toLocaleString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                            })}
-                            {event.end !== event.start &&
-                              ` - ${new Date(event.end).toLocaleTimeString(
-                                "en-US",
-                                {
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                }
-                              )}`}
-                          </Typography>
-                          {event.location && ` • ${event.location}`}
-                        </>
+                              <DeleteIcon fontSize="small" color="error" />
+                              <Typography
+                                variant="body2"
+                                color="text.primary"
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                }}
+                              >
+                                Delete
+                              </Typography>
+                            </MenuItem>
+                          </Menu>
+                        </Box>
                       }
-                    />
-                  </ListItem>
-                  <Divider />
-                </Box>
-              ))}
-            </List>
+                    >
+                      <ListItemText
+                        primary={event.title}
+                        secondary={
+                          <>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="text.primary"
+                            >
+                              {new Date(event.start).toLocaleString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                              })}
+                              {event.end !== event.start &&
+                                ` - ${new Date(event.end).toLocaleTimeString(
+                                  "en-US",
+                                  {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                  }
+                                )}`}
+                            </Typography>
+                            {event.location && ` • ${event.location}`}
+                          </>
+                        }
+                      />
+                    </ListItem>
+                    <Divider />
+                  </Box>
+                ))}
+              </List>
+            )}
             <Box
               sx={{
                 display: "flex",
