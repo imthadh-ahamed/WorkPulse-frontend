@@ -26,7 +26,6 @@ export const getEvents = async (
       params: { tenantId, page, limit, search },
     });
 
-    // Map _id to id
     const events = response.data.events.map((event: Event & { _id: string }) => ({
       ...event,
       id: event._id
