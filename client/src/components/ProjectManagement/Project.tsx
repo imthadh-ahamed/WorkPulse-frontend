@@ -1,7 +1,7 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
+import * as React from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Box,
@@ -16,13 +16,20 @@ import {
   CardActions,
 } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { projects } from "@/app/data/Projects";
 import { AddProjectModal } from "@/components/ProjectManagement/AddProjectModel"; // Import Add modal
 import { EditProjectModal } from "@/components/ProjectManagement/EditProjectModel"; // Import Edit modal
 import { DeleteProjectConfirmationModal } from "@/components/ProjectManagement/DeleteConfirmationModel"; // Import Delete modal
 import type { Project } from "@/types/Projects";
-import { Employees } from "@/app/data/Employee";
 import { PlusCircle } from "lucide-react";
+import {
+  getProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+} from "@/app/services/Project/project.service";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
+import { Employee } from "@/types/Employee";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -31,9 +38,13 @@ export default function ProjectManagementPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false); // State for Add modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for Edit modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for Delete modal
-  const [projectList, setProjectList] = useState(projects); // State for projects
+  const [projectList, setProjectList] = useState<Project[] | null>([]); // State for projects
   const [editingProject, setEditingProject] = useState<Project | null>(null); // State for editing
   const [deletingProject, setDeletingProject] = useState<Project | null>(null); // State for deleting
+
+  const user = useSelector(
+    (state: RootState) => state.user.userData
+  ) as Employee | null;
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -52,10 +63,16 @@ export default function ProjectManagementPage() {
     setIsEditModalOpen(true); // Open the Edit modal
   };
 
-  const handleDeleteProject = (projectId: number) => {
-    setProjectList((prevProjects) =>
-      prevProjects.filter((project) => project.id !== projectId)
-    ); // Remove the project from the list
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      await deleteProject(projectId); // Convert projectId to string
+      setProjectList(
+        (prevProjects) =>
+          (prevProjects || []).filter((project) => project.id !== projectId) // Ensure consistent types
+      );
+    } catch (error) {
+      console.error("Error deleting project:", error);
+    }
   };
 
   const handleOpenDeleteModal = (project: Project) => {
@@ -77,62 +94,70 @@ export default function ProjectManagementPage() {
 
   const handleConfirmDelete = () => {
     if (deletingProject) {
-      handleDeleteProject(deletingProject.id); // Delete the project
+      handleDeleteProject(deletingProject.id); // Ensure deletingProject.id is passed as a number
       setDeletingProject(null); // Reset deleting project
     }
   };
 
-  const handleSaveProject = (
+  const handleSaveProject = async (
     newProject: Omit<
       Project,
       "id" | "created" | "createdBy" | "modified" | "modifiedBy"
     >
   ) => {
-    if (editingProject) {
-      // Update existing project
-      setProjectList((prevProjects) =>
-        prevProjects.map((project) =>
-          project.id === editingProject.id
-            ? {
-                ...project,
-                ...newProject,
-                modified: new Date(),
-                modifiedBy: "currentUserId", // Replace with actual user ID
-              }
-            : project
-        )
-      );
-    } else {
-      // Add new project
+    try {
+      const createdProject = await createProject({
+        ...newProject,
+        tenantId: user?.tenantId || "null",
+        createdBy: "currentUserId",
+      });
       setProjectList((prevProjects) => [
-        ...prevProjects,
-        {
-          ...newProject,
-          id: prevProjects.length + 1,
-          created: new Date(),
-          createdBy: "currentUserId", // Replace with actual user ID
-          modified: new Date(),
-          modifiedBy: "currentUserId", // Replace with actual user ID
-        },
+        ...(prevProjects || []),
+        createdProject,
       ]);
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error("Error creating project:", error);
     }
-    setIsAddModalOpen(false); // Close the Add modal after saving
   };
 
-  const handleUpdateProject = (updatedProject: Project) => {
-    // Update the project in the list
-    setProjectList((prevProjects) =>
-      prevProjects.map((project) =>
-        project.id === updatedProject.id ? updatedProject : project
-      )
+  const handleUpdateProject = async (updatedProject: Project) => {
+    try {
+      const project = await updateProject(updatedProject.id, updatedProject);
+      setProjectList((prevProjects) =>
+        (prevProjects || []).map((p) => (p.id === project.id ? project : p))
+      );
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error("Error updating project:", error);
+    }
+  };
+
+  const paginatedProjects = React.useMemo(() => {
+    return (projectList || []).slice(
+      (page - 1) * ITEMS_PER_PAGE,
+      page * ITEMS_PER_PAGE
     );
-    setIsEditModalOpen(false); // Close the Edit modal after saving
-  };
+  }, [projectList, page]);
 
-  const paginatedProjects = projectList.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
-  );
+  const fetchProjects = React.useCallback(async () => {
+    try {
+      const response = await getProjects(
+        user?.tenantId ?? "null",
+        page,
+        ITEMS_PER_PAGE
+      );
+      console.log("Fetched Projects Response:", response);
+      setProjectList(response.projects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  }, [user?.tenantId, page]);
+
+  useEffect(() => {
+    fetchProjects();
+    console.log(paginatedProjects, "paginatedProjects");
+  }, [fetchProjects]);
 
   return (
     <Container maxWidth="xl">
@@ -156,7 +181,7 @@ export default function ProjectManagementPage() {
         </Button>
       </Box>
 
-      {projectList.length === 0 ? (
+      {projectList && projectList.length === 0 ? (
         <Typography variant="h6" color="text.secondary" align="center">
           No projects available. Click &quot;Add Project&quot; to create a new
           project.
@@ -217,7 +242,7 @@ export default function ProjectManagementPage() {
 
           <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
             <Pagination
-              count={Math.ceil(projectList.length / ITEMS_PER_PAGE)}
+              count={Math.ceil((projectList?.length ?? 0) / ITEMS_PER_PAGE)}
               page={page}
               onChange={handlePageChange}
               color="primary"
@@ -231,8 +256,8 @@ export default function ProjectManagementPage() {
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
         onSave={handleSaveProject}
-        employees={Employees} // Pass the list of employees here
         currentUser="currentUserId" // Replace with the actual current user ID
+        employees={[]} // Pass an empty array or the appropriate employees list
       />
 
       {/* EditProjectModal */}
@@ -242,7 +267,7 @@ export default function ProjectManagementPage() {
           onClose={handleCloseEditModal}
           onSave={handleUpdateProject}
           project={editingProject} // Pass the project to edit
-          employees={Employees} // Pass the list of employees here
+          employees={[]} // Pass an empty array or the appropriate employees list
           currentUser="currentUserId" // Replace with the actual current user ID
         />
       )}

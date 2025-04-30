@@ -1,8 +1,8 @@
 import { Employee } from "./Employee";
 
 export interface Project {
-  id: number;
-  tenantId: number;
+  id: string;
+  tenantId: string;
   name: string;
   description: string;
   isActive: boolean;
