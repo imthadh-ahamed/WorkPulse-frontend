@@ -19,9 +19,10 @@ import CardContent from "@mui/material/CardContent";
 import CardHeader from "@mui/material/CardHeader";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import AlertTitle from "@mui/material/AlertTitle";
-import { CardTitle } from "./UI/card";
-import { AlertDescription } from "./UI/alert";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Divider from "@mui/material/Divider";
+import Box from "@mui/material/Box";
 
 ChartJS.register(
   CategoryScale,
@@ -120,62 +121,84 @@ const Analytics: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <Box sx={{ padding: 4 }}>
       {error && (
-        <Alert variant="outlined">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+        <Alert severity="error" sx={{ marginBottom: 2 }}>
+          {error}
         </Alert>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Task Completion</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Bar data={taskCompletionData} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Productivity Score</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Line data={productivityScoreData} />
-          </CardContent>
-        </Card>
-      </div>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader
+              title="Task Completion"
+              titleTypographyProps={{ variant: "h6", fontWeight: "bold" }}
+            />
+            <Divider />
+            <CardContent>
+              <Bar data={taskCompletionData} />
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader
+              title="Productivity Score"
+              titleTypographyProps={{ variant: "h6", fontWeight: "bold" }}
+            />
+            <Divider />
+            <CardContent>
+              <Line data={productivityScoreData} />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>AI Predictions and Suggestions</CardTitle>
-        </CardHeader>
+      <Card sx={{ marginTop: 4 }}>
+        <CardHeader
+          title="AI Predictions and Suggestions"
+          titleTypographyProps={{ variant: "h6", fontWeight: "bold" }}
+        />
+        <Divider />
         <CardContent>
-          <Button onClick={generatePrediction}>Generate Prediction</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={generatePrediction}
+            sx={{ marginBottom: 2 }}
+          >
+            Generate Prediction
+          </Button>
           {prediction && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold">
+            <Box>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
                 Predicted Productivity Score: {prediction.productivityScore}
-              </h3>
-              <h4 className="text-md font-semibold mt-2">
+              </Typography>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                 Suggested Tasks for Next Week:
-              </h4>
-              <ul className="list-disc pl-5">
+              </Typography>
+              <ul>
                 {prediction.suggestedTasks.map((task, index) => (
-                  <li key={index}>{task}</li>
+                  <li key={index}>
+                    <Typography variant="body1">{task}</Typography>
+                  </li>
                 ))}
               </ul>
-              <h4 className="text-md font-semibold mt-2">Insights:</h4>
-              <ul className="list-disc pl-5">
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Insights:
+              </Typography>
+              <ul>
                 {prediction.insights.map((insight, index) => (
-                  <li key={index}>{insight}</li>
+                  <li key={index}>
+                    <Typography variant="body1">{insight}</Typography>
+                  </li>
                 ))}
               </ul>
-            </div>
+            </Box>
           )}
         </CardContent>
       </Card>
-    </div>
+    </Box>
   );
 };
 
