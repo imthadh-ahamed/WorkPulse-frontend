@@ -16,9 +16,9 @@ import {
   CardActions,
 } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { AddProjectModal } from "@/components/ProjectManagement/AddProjectModel"; // Import Add modal
-import { EditProjectModal } from "@/components/ProjectManagement/EditProjectModel"; // Import Edit modal
-import { DeleteProjectConfirmationModal } from "@/components/ProjectManagement/DeleteConfirmationModel"; // Import Delete modal
+import { AddProjectModal } from "@/components/ProjectManagement/AddProjectModal"; // Import Add modal
+import { EditProjectModal } from "@/components/ProjectManagement/EditProjectModal"; // Import Edit modal
+import { DeleteProjectConfirmationModal } from "@/components/ProjectManagement/DeleteConfirmationModal"; // Import Delete modal
 import type { Project } from "@/types/Projects";
 import { PlusCircle } from "lucide-react";
 import {
