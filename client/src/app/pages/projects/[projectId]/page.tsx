@@ -1,12 +1,17 @@
 import TaskManagement from "@/components/TaskManagement/TaskManagement";
 import AdminTaskManagement from "@/components/TaskManagement/AdminTaskManagement";
 
+interface TaskManagementPageProps {
+  readonly params: { readonly projectId: string };
+}
+
 export default function TaskManagementPage({
   params,
-}: Readonly<{
-  params: { projectId: string };
-}>) {
-  const userRole = localStorage.getItem("userRole") || "User";
+}: TaskManagementPageProps) {
+  const userRole =
+    typeof window !== "undefined"
+      ? localStorage.getItem("userRole") || "User"
+      : "User";
 
   if (userRole === "Admin") {
     return <AdminTaskManagement params={params} />;

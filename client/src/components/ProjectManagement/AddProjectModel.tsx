@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import {
   Button,
   Dialog,
@@ -23,22 +22,25 @@ import {
 } from "@mui/material";
 import type { Employee } from "@/types/Employee";
 import type { Project } from "@/types/Projects";
-import { Formik, Field, Form, ErrorMessage, FormikErrors } from "formik";
+import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/redux/store";
+import { getAllEmployees } from "@/app/services/Employee/employee.service";
 
 interface AddProjectModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSave: (
     project: Omit<
       Project,
       "id" | "created" | "createdBy" | "modified" | "modifiedBy"
     >
   ) => void;
-  employees: Employee[];
-  currentUser: string;
+  readonly employees: Employee[];
+  readonly currentUser: string;
 }
 
 const validationSchema = Yup.object({
@@ -52,39 +54,47 @@ const validationSchema = Yup.object({
     .max(100, "Display name can't exceed 100 characters")
     .required("Display name is required"),
   isActive: Yup.boolean().required("Status is required"),
-  users: Yup.array().of(
-    Yup.object().shape({
-      id: Yup.number().required(),
-    })
-  ),
+  users: Yup.array()
+    .of(
+      Yup.object().shape({
+        id: Yup.string().required("Employee is required"),
+      })
+    )
+    .min(1, "At least one user must be assigned to the project"),
 });
 
 export function AddProjectModal({
   isOpen,
   onClose,
   onSave,
-  employees,
   currentUser,
 }: AddProjectModalProps) {
-  const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
-  const isFormValid = (
-    errors: FormikErrors<{
-      name: string;
-      description: string;
-      displayName: string;
-      isActive: boolean;
-      users: Employee[];
-      closed?: Date | null;
-    }>,
-    values: { name: string; description: string; displayName: string }
-  ) => {
-    return (
-      Object.keys(errors).length === 0 &&
-      values.name &&
-      values.description &&
-      values.displayName
-    );
+  const user = useSelector(
+    (state: RootState) => state.user.userData
+  ) as Employee | null;
+
+  useEffect(() => {
+    if (user?.tenantId) {
+      fetchEmployees(user?.tenantId);
+    }
+  }, [user]);
+
+  const fetchEmployees = async (tenantId: string) => {
+    try {
+      const fetchedEmployees = await getAllEmployees(
+        tenantId,
+        1,
+        100,
+        ""
+      );
+      setEmployees(fetchedEmployees.employees);
+      console.log(fetchedEmployees, "Fetched Employees");
+    } catch (error) {
+      console.error("Failed to fetch employees:", error);
+    }
   };
 
   const handleSave = (values: {
@@ -95,11 +105,11 @@ export function AddProjectModal({
     users: Employee[];
     closed?: Date | null;
   }) => {
-    // Create a new project object
     const newProject = {
       ...values,
       created: new Date(),
       createdBy: currentUser,
+      tenantId: user?.tenantId ?? "",
     };
 
     onSave(newProject);
@@ -109,9 +119,9 @@ export function AddProjectModal({
     onClose();
   };
 
-  const handleEmployeeChange = (event: SelectChangeEvent<number[]>) => {
-    const value = event.target.value as number[];
-    setSelectedEmployees(value);
+  const handleEmployeeChange = (event: SelectChangeEvent<string[]>) => {
+    const selectedIds = event.target.value as string[];
+    setSelectedEmployees(selectedIds);
   };
 
   return (
@@ -254,22 +264,27 @@ export function AddProjectModal({
                         labelId="users-label"
                         multiple
                         value={selectedEmployees}
-                        onChange={(e: SelectChangeEvent<number[]>) => {
+                        onChange={(e: SelectChangeEvent<string[]>) => {
                           handleEmployeeChange(e);
-                          const selectedIds = e.target.value as number[];
-                          const selectedUsers = employees.filter((emp) =>
-                            selectedIds.includes(emp.id)
+                          const selectedIds = e.target.value as string[];
+                          setSelectedEmployees(selectedIds);
+                          const selectedUsers = employees.filter(
+                            (emp) =>
+                              emp.id !== undefined &&
+                              selectedIds.includes(emp.id)
                           );
                           setFieldValue("users", selectedUsers);
                         }}
                         renderValue={(selected) => {
-                          const selectedNames = (selected as number[])
-                            .map((id) => {
-                              const emp = employees.find((e) => e.id === id);
-                              return emp
-                                ? `${emp.firstName} ${emp.lastName}`
-                                : "";
-                            })
+                          const getEmployeeName = (id: string) => {
+                            const emp = employees.find((e) => e.id === id);
+                            return emp
+                              ? `${emp.firstName} ${emp.lastName}`
+                              : "";
+                          };
+
+                          const selectedNames = selected
+                            .map(getEmployeeName)
                             .join(", ");
                           return selectedNames;
                         }}
@@ -285,7 +300,7 @@ export function AddProjectModal({
                         ))}
                       </Select>
                       <FormHelperText>
-                        Optional: Select team members for this project
+                        At least one team member must be assigned to the project
                       </FormHelperText>
                     </FormControl>
                   </Grid>
@@ -308,7 +323,6 @@ export function AddProjectModal({
                   variant="contained"
                   type="submit"
                   color="primary"
-                  disabled={!isFormValid(errors, values)}
                   sx={{
                     textTransform: "none",
                     fontWeight: "bold",
