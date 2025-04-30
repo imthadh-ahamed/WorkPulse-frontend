@@ -87,6 +87,16 @@ export async function POST(request: Request) {
       "Your team collaboration improves during afternoon hours",
       "You are more likely to meet deadlines when using task management tools",
       "You tend to complete tasks faster when working in a quiet environment",
+      "Regular exercise positively impacts your focus and energy levels",
+      "Listening to instrumental music enhances your concentration",
+      "You excel at tasks requiring attention to detail in the early afternoon",
+      "Setting daily goals increases your task completion rate",
+      "You are more creative when working in a visually organized space",
+      "Your productivity improves after a good night's sleep",
+      "Working in short, focused bursts (Pomodoro technique) boosts efficiency",
+      "Collaborating with peers on challenging tasks enhances outcomes",
+      "You perform better when you prioritize tasks the night before",
+      "Your ability to solve problems improves after physical activity",
 
       // Negative insights
       "Your productivity drops slightly on Monday mornings",
@@ -104,6 +114,17 @@ export async function POST(request: Request) {
       "Your creativity declines when under constant time pressure",
       "Working late hours reduces your next-day performance",
       "You are less effective when switching between unrelated tasks",
+      "Extended periods of sitting negatively impact your energy levels",
+      "Unclear task priorities lead to delays in project completion",
+      "You are less productive when working in cluttered environments",
+      "Over-reliance on multitasking reduces the quality of your work",
+      "Your focus diminishes after consuming heavy meals",
+      "You are more likely to make errors when rushing through tasks",
+      "Prolonged exposure to notifications disrupts your workflow",
+      "Skipping planning sessions results in missed deadlines",
+      "You experience decision fatigue when handling too many choices",
+      "Working without clear goals reduces your motivation",
+      "Ignoring feedback loops hinders your performance improvement",
     ];
 
     const insights = Array.from(
