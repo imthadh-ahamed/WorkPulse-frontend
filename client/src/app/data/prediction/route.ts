@@ -18,6 +18,11 @@ export async function POST(request: Request) {
       "Review and prioritize backlog items",
       "Prepare presentation for stakeholder meeting",
       "Update project documentation",
+      "Organize team brainstorming session for new ideas",
+      "Analyze project risks and mitigation strategies",
+      "Draft email updates for stakeholders",
+      "Plan next sprint goals and deliverables",
+      "Conduct code review for pending pull requests",
     ];
 
     // Generate insights based on work patterns
@@ -27,6 +32,11 @@ export async function POST(request: Request) {
       "Consider scheduling focused work sessions for complex tasks",
       "Taking short breaks every 90 minutes may improve your productivity",
       "You're most effective when working on one project at a time",
+      "Collaborative tasks are completed faster in the afternoon hours",
+      "You tend to perform better after attending team meetings",
+      "Allocating time for learning new skills boosts your overall efficiency",
+      "Tasks with clear deadlines are completed more consistently",
+      "You achieve higher quality output when working in distraction-free environments",
     ];
 
     // Simulate ML processing time
