@@ -9,19 +9,20 @@ import {
   TextField,
   Button,
   Box,
-  Grid,
   IconButton,
 } from "@mui/material";
 import { FocusSession } from "@/types/FocusSession";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Close as CloseIcon } from "@mui/icons-material";
+import { createFocusMode } from "@/app/services/FocusMode/focusmode.service";
 
 interface FocusTimeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (session: FocusSession) => void;
-  session: FocusSession | null;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSave: (session: FocusSession) => void;
+  readonly session: FocusSession | null;
+  readonly resetForm: () => void;
 }
 
 const validationSchema = Yup.object({
@@ -35,6 +36,7 @@ export default function FocusTimeModal({
   onClose,
   onSave,
   session,
+  resetForm,
 }: FocusTimeModalProps) {
   const initialValues: FocusSession = session || {
     id: "",
@@ -46,8 +48,15 @@ export default function FocusTimeModal({
     createdBy: "",
   };
 
-  const handleSave = (values: FocusSession) => {
-    onSave(values);
+  const handleSave = async (values: FocusSession) => {
+    try {
+      const newFocusSession = await createFocusMode(values);
+      onSave(newFocusSession);
+      resetForm();
+      onClose();
+    } catch (error) {
+      console.error("Error creating focus session:", error);
+    }
   };
 
   return (
@@ -73,80 +82,74 @@ export default function FocusTimeModal({
           {({ values, handleChange, handleBlur, touched, errors }) => (
             <Form>
               <Box sx={{ mt: 2 }}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Field
-                      required
-                      name="title"
-                      as={TextField}
-                      label="Session Title"
-                      fullWidth
-                      value={values.title}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.title && Boolean(errors.title)}
-                      helperText={<ErrorMessage name="title" />}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                        },
-                        "& .MuiInputLabel-root": {
-                          fontSize: "1.1rem",
-                          color: "#333",
-                        },
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      required
-                      name="focusHours"
-                      as={TextField}
-                      type="number"
-                      inputProps={{ step: "0.1" }}
-                      label="Focus Hours"
-                      fullWidth
-                      value={values.focusHours}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.focusHours && Boolean(errors.focusHours)}
-                      helperText={<ErrorMessage name="focusHours" />}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                        },
-                        "& .MuiInputLabel-root": {
-                          fontSize: "1.1rem",
-                          color: "#333",
-                        },
-                        mt: 2,
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      name="description"
-                      as={TextField}
-                      label="Description (Optional)"
-                      fullWidth
-                      value={values.description}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.description && Boolean(errors.description)}
-                      helperText={<ErrorMessage name="description" />}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                        },
-                        "& .MuiInputLabel-root": {
-                          fontSize: "1.1rem",
-                          color: "#333",
-                        },
-                        mt: 2,
-                      }}
-                    />
-                  </Grid>
-                </Grid>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Field
+                    required
+                    name="title"
+                    as={TextField}
+                    label="Session Title"
+                    fullWidth
+                    value={values.title}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.title && Boolean(errors.title)}
+                    helperText={<ErrorMessage name="title" />}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontSize: "1.1rem",
+                        color: "#333",
+                      },
+                    }}
+                  />
+                  <Field
+                    required
+                    name="focusHours"
+                    as={TextField}
+                    type="number"
+                    inputProps={{ step: "0.1" }}
+                    label="Focus Hours"
+                    fullWidth
+                    value={values.focusHours}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.focusHours && Boolean(errors.focusHours)}
+                    helperText={<ErrorMessage name="focusHours" />}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontSize: "1.1rem",
+                        color: "#333",
+                      },
+                      mt: 2,
+                    }}
+                  />
+                  <Field
+                    name="description"
+                    as={TextField}
+                    label="Description (Optional)"
+                    fullWidth
+                    value={values.description}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.description && Boolean(errors.description)}
+                    helperText={<ErrorMessage name="description" />}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontSize: "1.1rem",
+                        color: "#333",
+                      },
+                      mt: 2,
+                    }}
+                  />
+                </Box>
               </Box>
               <DialogActions sx={{ mt: 2, justifyContent: "space-between" }}>
                 <Button
