@@ -32,6 +32,7 @@ import { getAllEmployees } from "@/app/services/Employee/employee.service";
 
 interface AddProjectModalProps {
   readonly isOpen: boolean;
+  readonly resetForm: () => void
   readonly onClose: () => void;
   readonly onSave: (
     project: Omit<
@@ -40,7 +41,6 @@ interface AddProjectModalProps {
     >
   ) => void;
   readonly employees: Employee[];
-  readonly currentUser: string;
 }
 
 const validationSchema = Yup.object({
@@ -67,7 +67,7 @@ export function AddProjectModal({
   isOpen,
   onClose,
   onSave,
-  currentUser,
+  resetForm,
 }: AddProjectModalProps) {
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -108,11 +108,11 @@ export function AddProjectModal({
     const newProject = {
       ...values,
       created: new Date(),
-      createdBy: currentUser,
       tenantId: user?.tenantId ?? "",
     };
 
     onSave(newProject);
+    resetForm();
   };
 
   const handleClose = () => {

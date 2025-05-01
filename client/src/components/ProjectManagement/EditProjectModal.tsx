@@ -34,7 +34,6 @@ interface EditProjectModalProps {
   onSave: (project: Project) => void;
   project: Project;
   employees: Employee[];
-  currentUser: string;
 }
 
 const validationSchema = Yup.object({
@@ -49,12 +48,12 @@ const validationSchema = Yup.object({
     .required("Display name is required"),
   isActive: Yup.boolean().required("Status is required"),
   users: Yup.array()
-      .of(
-        Yup.object().shape({
-          id: Yup.string().required("Employee is required"),
-        })
-      )
-      .min(1, "At least one user must be assigned to the project"),
+    .of(
+      Yup.object().shape({
+        id: Yup.string().required("Employee is required"),
+      })
+    )
+    .min(1, "At least one user must be assigned to the project"),
 });
 
 export function EditProjectModal({
@@ -63,7 +62,6 @@ export function EditProjectModal({
   onSave,
   project,
   employees,
-  currentUser,
 }: Readonly<EditProjectModalProps>) {
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
 
@@ -84,7 +82,6 @@ export function EditProjectModal({
     const updatedProject = {
       ...values,
       modified: new Date(),
-      modifiedBy: currentUser,
     };
 
     onSave(updatedProject);
@@ -143,200 +140,202 @@ export function EditProjectModal({
           }) => (
             <Form>
               <Box sx={{ mt: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Field
-                required
-                name="name"
-                as={TextField}
-                label="Project Name"
-                fullWidth
-                value={values.name}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.name && Boolean(errors.name)}
-                helperText={<ErrorMessage name="name" />}
-                sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "8px",
-            },
-            "& .MuiInputLabel-root": {
-              fontSize: "1.1rem",
-              color: "#333",
-            },
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Field
-                required
-                name="displayName"
-                as={TextField}
-                label="Display Name"
-                fullWidth
-                value={values.displayName}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.displayName && Boolean(errors.displayName)}
-                helperText={<ErrorMessage name="displayName" />}
-                sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "8px",
-            },
-            "& .MuiInputLabel-root": {
-              fontSize: "1.1rem",
-              color: "#333",
-            },
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Field
-                required
-                name="description"
-                as={TextField}
-                label="Description"
-                fullWidth
-                multiline
-                rows={4}
-                value={values.description}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.description && Boolean(errors.description)}
-                helperText={<ErrorMessage name="description" />}
-                sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "8px",
-            },
-            "& .MuiInputLabel-root": {
-              fontSize: "1.1rem",
-              color: "#333",
-            },
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-            <Switch
-              checked={values.isActive}
-              onChange={(e) => {
-                setFieldValue("isActive", e.target.checked);
-                // If project is being deactivated, set closed date
-                if (!e.target.checked && !values.closed) {
-                  setFieldValue("closed", new Date());
-                } else if (e.target.checked) {
-                  // If project is being reactivated, clear closed date
-                  setFieldValue("closed", null);
-                }
-              }}
-              name="isActive"
-              color="primary"
-            />
-                }
-                label="Active Project"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl
-                fullWidth
-                sx={{
-            "& .MuiInputLabel-root": {
-              fontSize: "1.1rem",
-            },
-                }}
-              >
-                <InputLabel id="users-label">Team Members</InputLabel>
-                <Select
-            labelId="users-label"
-            multiple
-            value={selectedEmployees}
-            onChange={(e: SelectChangeEvent<string[]>) => {
-              handleEmployeeChange(e);
-              const selectedIds = e.target.value as string[];
-              const selectedUsers = employees.filter((emp) =>
-                emp.id !== undefined && selectedIds.includes(emp.id)
-              );
-              setFieldValue("users", selectedUsers);
-            }}
-            renderValue={(selected) => {
-              const selectedNames = (selected as string[])
-                .map((id) => {
-                  const emp = employees.find((e) => e.id === id);
-                  return emp
-              ? `${emp.firstName} ${emp.lastName}`
-              : "";
-                })
-                .join(", ");
-              return selectedNames;
-            }}
-            sx={{
-              borderRadius: "8px",
-            }}
-                >
-            {employees.map((employee) => (
-              <MenuItem key={employee.id} value={employee.id}>
-                {employee.firstName} {employee.lastName} (
-                {employee.role})
-              </MenuItem>
-            ))}
-                </Select>
-                <FormHelperText>
-            Manage team members for this project
-                </FormHelperText>
-              </FormControl>
-            </Grid>
-            {/* Display creation and modification info */}
-            <Grid item xs={12}>
-              <Box
-                sx={{
-            mt: 2,
-            color: "text.secondary",
-            fontSize: "0.875rem",
-                }}
-              >
-                {project?.created && (
-            <div>
-              Created: {new Date(project.created).toLocaleString()}{" "}
-              by {project.createdBy}
-            </div>
-                )}
-                {project?.modified && project?.modifiedBy && (
-            <div>
-              Last Modified:{" "}
-              {new Date(project.modified).toLocaleString()} by{" "}
-              {project.modifiedBy}
-            </div>
-                )}
-              </Box>
-            </Grid>
-          </Grid>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Field
+                      required
+                      name="name"
+                      as={TextField}
+                      label="Project Name"
+                      fullWidth
+                      value={values.name}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.name && Boolean(errors.name)}
+                      helperText={<ErrorMessage name="name" />}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                        },
+                        "& .MuiInputLabel-root": {
+                          fontSize: "1.1rem",
+                          color: "#333",
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Field
+                      required
+                      name="displayName"
+                      as={TextField}
+                      label="Display Name"
+                      fullWidth
+                      value={values.displayName}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.displayName && Boolean(errors.displayName)}
+                      helperText={<ErrorMessage name="displayName" />}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                        },
+                        "& .MuiInputLabel-root": {
+                          fontSize: "1.1rem",
+                          color: "#333",
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field
+                      required
+                      name="description"
+                      as={TextField}
+                      label="Description"
+                      fullWidth
+                      multiline
+                      rows={4}
+                      value={values.description}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.description && Boolean(errors.description)}
+                      helperText={<ErrorMessage name="description" />}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                        },
+                        "& .MuiInputLabel-root": {
+                          fontSize: "1.1rem",
+                          color: "#333",
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={values.isActive}
+                          onChange={(e) => {
+                            setFieldValue("isActive", e.target.checked);
+                            // If project is being deactivated, set closed date
+                            if (!e.target.checked && !values.closed) {
+                              setFieldValue("closed", new Date());
+                            } else if (e.target.checked) {
+                              // If project is being reactivated, clear closed date
+                              setFieldValue("closed", null);
+                            }
+                          }}
+                          name="isActive"
+                          color="primary"
+                        />
+                      }
+                      label="Active Project"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormControl
+                      fullWidth
+                      sx={{
+                        "& .MuiInputLabel-root": {
+                          fontSize: "1.1rem",
+                        },
+                      }}
+                    >
+                      <InputLabel id="users-label">Team Members</InputLabel>
+                      <Select
+                        labelId="users-label"
+                        multiple
+                        value={selectedEmployees}
+                        onChange={(e: SelectChangeEvent<string[]>) => {
+                          handleEmployeeChange(e);
+                          const selectedIds = e.target.value as string[];
+                          const selectedUsers = employees.filter(
+                            (emp) =>
+                              emp.id !== undefined &&
+                              selectedIds.includes(emp.id)
+                          );
+                          setFieldValue("users", selectedUsers);
+                        }}
+                        renderValue={(selected) => {
+                          const selectedNames = (selected as string[])
+                            .map((id) => {
+                              const emp = employees.find((e) => e.id === id);
+                              return emp
+                                ? `${emp.firstName} ${emp.lastName}`
+                                : "";
+                            })
+                            .join(", ");
+                          return selectedNames;
+                        }}
+                        sx={{
+                          borderRadius: "8px",
+                        }}
+                      >
+                        {employees.map((employee) => (
+                          <MenuItem key={employee.id} value={employee.id}>
+                            {employee.firstName} {employee.lastName} (
+                            {employee.role})
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <FormHelperText>
+                        Manage team members for this project
+                      </FormHelperText>
+                    </FormControl>
+                  </Grid>
+                  {/* Display creation and modification info */}
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        mt: 2,
+                        color: "text.secondary",
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      {project?.created && (
+                        <div>
+                          Created: {new Date(project.created).toLocaleString()}{" "}
+                          by {project.createdBy}
+                        </div>
+                      )}
+                      {project?.modified && project?.modifiedBy && (
+                        <div>
+                          Last Modified:{" "}
+                          {new Date(project.modified).toLocaleString()} by{" "}
+                          {project.modifiedBy}
+                        </div>
+                      )}
+                    </Box>
+                  </Grid>
+                </Grid>
               </Box>
               <DialogActions sx={{ mt: 2, justifyContent: "space-between" }}>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={handleClose}
-            sx={{
-              textTransform: "none",
-              fontWeight: "bold",
-              padding: "8px 16px",
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            type="submit"
-            color="primary"
-            sx={{
-              textTransform: "none",
-              fontWeight: "bold",
-              padding: "8px 16px",
-            }}
-          >
-            Save Changes
-          </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={handleClose}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    padding: "8px 16px",
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  type="submit"
+                  color="primary"
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    padding: "8px 16px",
+                  }}
+                >
+                  Save Changes
+                </Button>
               </DialogActions>
             </Form>
           )}

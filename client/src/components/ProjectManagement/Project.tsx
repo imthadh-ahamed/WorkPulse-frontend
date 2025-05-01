@@ -16,9 +16,9 @@ import {
   CardActions,
 } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { AddProjectModal } from "@/components/ProjectManagement/AddProjectModal"; // Import Add modal
-import { EditProjectModal } from "@/components/ProjectManagement/EditProjectModal"; // Import Edit modal
-import { DeleteProjectConfirmationModal } from "@/components/ProjectManagement/DeleteConfirmationModal"; // Import Delete modal
+import { AddProjectModal } from "@/components/ProjectManagement/AddProjectModal";
+import { EditProjectModal } from "@/components/ProjectManagement/EditProjectModal";
+import { DeleteProjectConfirmationModal } from "@/components/ProjectManagement/DeleteConfirmationModal";
 import type { Project } from "@/types/Projects";
 import { PlusCircle } from "lucide-react";
 import {
@@ -35,12 +35,13 @@ const ITEMS_PER_PAGE = 9;
 
 export default function ProjectManagementPage() {
   const [page, setPage] = useState(1);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // State for Add modal
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for Edit modal
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for Delete modal
-  const [projectList, setProjectList] = useState<Project[] | null>([]); // State for projects
-  const [editingProject, setEditingProject] = useState<Project | null>(null); // State for editing
-  const [deletingProject, setDeletingProject] = useState<Project | null>(null); // State for deleting
+  const [totalItems, setTotalItems] = useState(0);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [projectList, setProjectList] = useState<Project[] | null>([]);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [deletingProject, setDeletingProject] = useState<Project | null>(null);
 
   const user = useSelector(
     (state: RootState) => state.user.userData
@@ -50,25 +51,25 @@ export default function ProjectManagementPage() {
     event: React.ChangeEvent<unknown>,
     value: number
   ) => {
+    console.log("wp Page Changed To:", value);
     setPage(value);
   };
 
   const handleAddProject = () => {
-    setEditingProject(null); // Reset editing state
-    setIsAddModalOpen(true); // Open the Add modal
+    setEditingProject(null);
+    setIsAddModalOpen(true);
   };
 
   const handleEditProject = (project: Project) => {
-    setEditingProject(project); // Set the project to edit
-    setIsEditModalOpen(true); // Open the Edit modal
+    setEditingProject(project);
+    setIsEditModalOpen(true);
   };
 
   const handleDeleteProject = async (projectId: string) => {
     try {
-      await deleteProject(projectId); // Convert projectId to string
-      setProjectList(
-        (prevProjects) =>
-          (prevProjects || []).filter((project) => project.id !== projectId) // Ensure consistent types
+      await deleteProject(projectId);
+      setProjectList((prevProjects) =>
+        (prevProjects || []).filter((project) => project.id !== projectId)
       );
     } catch (error) {
       console.error("Error deleting project:", error);
@@ -76,16 +77,16 @@ export default function ProjectManagementPage() {
   };
 
   const handleOpenDeleteModal = (project: Project) => {
-    setDeletingProject(project); // Set the project to delete
-    setIsDeleteModalOpen(true); // Open the Delete modal
+    setDeletingProject(project);
+    setIsDeleteModalOpen(true);
   };
 
   const handleCloseAddModal = () => {
-    setIsAddModalOpen(false); // Close the Add modal
+    setIsAddModalOpen(false);
   };
 
   const handleCloseEditModal = () => {
-    setIsEditModalOpen(false); // Close the Edit modal
+    setIsEditModalOpen(false);
   };
 
   const handleCloseDeleteModal = () => {
@@ -94,8 +95,8 @@ export default function ProjectManagementPage() {
 
   const handleConfirmDelete = () => {
     if (deletingProject) {
-      handleDeleteProject(deletingProject.id); // Ensure deletingProject.id is passed as a number
-      setDeletingProject(null); // Reset deleting project
+      handleDeleteProject(deletingProject.id);
+      setDeletingProject(null);
     }
   };
 
@@ -108,14 +109,15 @@ export default function ProjectManagementPage() {
     try {
       const createdProject = await createProject({
         ...newProject,
-        tenantId: user?.tenantId || "null",
-        createdBy: "currentUserId",
+        tenantId: user?.tenantId ?? "null",
+        createdBy: user?.id ?? "null",
       });
       setProjectList((prevProjects) => [
         ...(prevProjects || []),
         createdProject,
       ]);
       setIsAddModalOpen(false);
+      fetchProjects();
     } catch (error) {
       console.error("Error creating project:", error);
     }
@@ -147,8 +149,8 @@ export default function ProjectManagementPage() {
         page,
         ITEMS_PER_PAGE
       );
-      console.log("Fetched Projects Response:", response);
       setProjectList(response.projects);
+      setTotalItems(response.totalItems);
     } catch (error) {
       console.error("Error fetching projects:", error);
     }
@@ -156,7 +158,6 @@ export default function ProjectManagementPage() {
 
   useEffect(() => {
     fetchProjects();
-    console.log(paginatedProjects, "paginatedProjects");
   }, [fetchProjects]);
 
   return (
@@ -190,7 +191,7 @@ export default function ProjectManagementPage() {
         <>
           <Grid container spacing={4}>
             {paginatedProjects.map((project) => (
-              <Grid item xs={12} sm={6} md={4} key={project.id}>
+              <Grid item xs={12} sm={6} md={4} key={`${project.id}-${page}`}>
                 <Card>
                   <CardContent>
                     <Link href={`/pages/projects/${project.id}`} passHref>
@@ -216,20 +217,20 @@ export default function ProjectManagementPage() {
                         <Button
                           size="small"
                           startIcon={<EditIcon />}
-                          onClick={() => handleEditProject(project)} // Open Edit modal on click
+                          onClick={() => handleEditProject(project)}
                           sx={{
-                            minWidth: "auto", // Remove extra padding
-                            padding: "6px", // Adjust padding for a compact look
+                            minWidth: "auto",
+                            padding: "6px",
                           }}
                         />
                         <Button
                           size="small"
                           startIcon={<DeleteIcon />}
                           color="error"
-                          onClick={() => handleOpenDeleteModal(project)} // Open Delete modal on click
+                          onClick={() => handleOpenDeleteModal(project)}
                           sx={{
-                            minWidth: "auto", // Remove extra padding
-                            padding: "6px", // Adjust padding for a compact look
+                            minWidth: "auto",
+                            padding: "6px",
                           }}
                         />
                       </Box>
@@ -242,7 +243,7 @@ export default function ProjectManagementPage() {
 
           <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
             <Pagination
-              count={Math.ceil((projectList?.length ?? 0) / ITEMS_PER_PAGE)}
+              count={Math.ceil(totalItems / ITEMS_PER_PAGE)}
               page={page}
               onChange={handlePageChange}
               color="primary"
@@ -256,8 +257,8 @@ export default function ProjectManagementPage() {
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
         onSave={handleSaveProject}
-        currentUser="currentUserId" // Replace with the actual current user ID
-        employees={[]} // Pass an empty array or the appropriate employees list
+        resetForm={() => {}}
+        employees={[]}
       />
 
       {/* EditProjectModal */}
@@ -268,7 +269,6 @@ export default function ProjectManagementPage() {
           onSave={handleUpdateProject}
           project={editingProject} // Pass the project to edit
           employees={[]} // Pass an empty array or the appropriate employees list
-          currentUser="currentUserId" // Replace with the actual current user ID
         />
       )}
 
