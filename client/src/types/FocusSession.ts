@@ -1,6 +1,6 @@
 export interface FocusSession {
-  id: string;
-  tenantId: number;
+  _id: string;
+  tenantId: string;
   title: string;
   focusHours: number;
   endTime?: string;
